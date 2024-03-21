@@ -1,5 +1,5 @@
 #!/bin/zsh
-echo "Launch."
+echo "Launch. - IF NOT INSTALL ZSH and set it by default : chsh -s \$(which zsh)"
 
 RED='\033[0;31m'
 NOCOLOR='\033[0m'
@@ -26,7 +26,7 @@ echo -e "${RED}Setup grp.${NOCOLOR}"
 sudo groupadd -f docker # -f is here because in most of the case the cmd failed bcs the group already exist
 echo -e "${RED}Setup usermod.${NOCOLOR}"
 sudo usermod -aG docker $USER
-echo -e "${RED}Refresh grp.${NOCOLOR}"
+#echo -e "${RED}Refresh grp.${NOCOLOR}"
 #newgrp docker
 echo -e "${RED}start docker.${NOCOLOR}"
 sudo systemctl start docker
@@ -55,15 +55,13 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 ## zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ## copy config file
-mv ~/.zshrc ~/.zshrc.post-a2n.bak
+mv ~/.zshrc ~/.zshrc.pre-a2n.bak
 cp .zshrc ~/.zshrc
 
 echo -e "${RED}Install volta.${NOCOLOR}"
 ## volta for node management
-curl https://get.volta.sh | zsh
-source ~/.zshrc
-volta install node
-volta install yarn
+curl https://get.volta.sh | bash
+volta install node yarn
 
 echo -e "${RED}Setup host and host.deny.${NOCOLOR}"
 # host deny config
