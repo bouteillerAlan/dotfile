@@ -19,3 +19,6 @@ alias battery="cat /sys/class/power_supply/BAT0/capacity"
 export GPG_TTY=$(tty)
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
+export ANDROID_HOME="$HOME/Android/Sdk"
+
+eval "$(starship init zsh)"
