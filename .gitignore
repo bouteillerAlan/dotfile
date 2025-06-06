@@ -2,6 +2,7 @@
 **
 
 # Unignore what you care about
+!.package.list
 !.gitignore
 !.zshrc
 !.zshenv
