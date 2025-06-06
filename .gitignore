@@ -1,0 +1,13 @@
+# Ignore everything
+**
+
+# Unignore what you care about
+!.gitignore
+!.zshrc
+!.zshenv
+!.gitconfig
+!.config/
+!.config/kitty/
+!.config/nvim/
+!.config/kitty/**
+!.config/nvim/**
