@@ -23,3 +23,5 @@ volta install node
 curl https://go.dev/dl/go1.25.1.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.1.linux-amd64.tar.gz
 
+# rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
