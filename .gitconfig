@@ -1,8 +1,0 @@
-[commit]
-	gpgsign = true
-[user]
-	name = Bouteiller [a2n] Alan
-	email = a2n.dev@pm.me
-	signingkey = 6A2ECC8A396F8A943A109A1E0F11C2A6BF79111E
-[init]
-	defaultBranch = main
