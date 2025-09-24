@@ -3,7 +3,7 @@
 cd ~/Downloads/
 
 # install base packages
-sudo pacman -Syu && sudo pacman -S python zsh neovim btop kleopatra keepassxc ghostty discord signal-desktop gimp partitionmanager kooha meld nextcloud-client ttf-jetbrains-mono-nerd aws-cli-v2 zoxide tree && yay -S intellij-idea-ultimate-edition coppwr zen-browser
+sudo pacman -Syu && sudo pacman -S python zsh neovim btop kleopatra keepassxc ghostty discord signal-desktop gimp partitionmanager kooha meld nextcloud-client ttf-jetbrains-mono-nerd aws-cli-v2 zoxide tree lolcat ripgrep tldr screenfetch && yay -S intellij-idea-ultimate-edition coppwr zen-browser
 
 # install oh-my-zsh
 chsh -s $(which zsh)
