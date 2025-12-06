@@ -185,6 +185,7 @@ vim.lsp.config('lua_ls', {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 vim.lsp.config("cssls", {capabilities=capabilities})
+vim.lsp.config('html', {capabilities = capabilities})
 
 -- this lsp has to be installed before hand
 vim.lsp.enable("lua_ls")
@@ -195,4 +196,8 @@ vim.lsp.enable("eslint")
 vim.lsp.enable("groovyls")
 vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("cssls")
+vim.lsp.enable("emmet_language_server")
+vim.lsp.enable("html")
+vim.lsp.enable("codebook")
+vim.lsp.enable("svelte")
 
