@@ -21,6 +21,7 @@ vim.opt.rtp:prepend(lazypath)
 -- This is also a good place to setup other settings (vim.opt)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+vim.g.has_nerd_font = true
 vim.opt.hlsearch = true
 vim.opt.clipboard:append('unnamedplus')
 vim.opt.relativenumber = true
@@ -32,7 +33,9 @@ vim.opt.colorcolumn = "80"
 -- show trailling space
 vim.opt.list = true
 vim.opt.listchars = { trail = '*', nbsp = '+'}
-vim.opt.linespace = 0
+vim.opt.undofile = true -- keep the history of undo
+vim.opt.ignorecase = true -- in searching
+vim.opt.scrolloff = 10
 
 -- Setup lazy.nvim
 require("lazy").setup({
@@ -140,6 +143,7 @@ vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help ta
 
 vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = "Open parent directory" })
 vim.keymap.set('n', '<space>-', require("oil").toggle_float)
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- special config for lua copy pasted 
 -- from https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls 
@@ -186,12 +190,15 @@ vim.lsp.config('lua_ls', {
 
 -- for cssls
 --Enable (broadcasting) snippet capability for completion
-local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+local capabilities = require('blink.cmp').get_lsp_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 vim.lsp.config("cssls", {capabilities=capabilities})
-vim.lsp.config('html', {capabilities = capabilities})
+vim.lsp.config("html", {capabilities = capabilities})
+vim.lsp.config("jsonls", {capabilities = capabilities})
 
 -- this lsp has to be installed before hand
+vim.lsp.enable("dprint")
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("pyright")
 vim.lsp.enable("emmet_ls")
@@ -204,4 +211,7 @@ vim.lsp.enable("emmet_language_server")
 vim.lsp.enable("html")
 vim.lsp.enable("codebook")
 vim.lsp.enable("svelte")
+vim.lsp.enable("gh_actions_ls")
+vim.lsp.enable("jsonls")
+vim.lsp.enable("ts_ls")
 
