@@ -11,6 +11,10 @@ plugins=(git zoxide colorize docker docker-compose heroku nvm yarn ruby zsh-synt
 
 source $ZSH/oh-my-zsh.sh
 
+# Set up neovim as the default editor.
+export EDITOR="$(which nvim)"
+export VISUAL="$EDITOR"
+
 alias nv="nvim"
 alias ls="eza -la --icons=always --git"
 alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- for grep, tldr -- for man, glances or bpytop -- for ressource monitor, gping -- for ping, screenfetch -- for info, lolcat and figlet -- for fun' | lolcat"
@@ -26,7 +30,7 @@ export PATH="$PATH:$HOME/go/bin"
 # usefull for kitty
 export GPG_TTY=$(tty)
 
-#export ANDROID_HOME="$HOME/Android/Sdk"
+export ANDROID_HOME="$HOME/Android/Sdk"
 #export PATH="$HOME/.symfony5/bin:$PATH"
 
 # force editor for sudo user
@@ -50,4 +54,18 @@ eval "$(starship init zsh)"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# pnpm
+export PNPM_HOME="/home/a2n/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# deno
+. "/home/a2n/.deno/env"
+
+# add Pulumi to the PATH
+export PATH=$PATH:/home/a2n/.pulumi/bin
 
