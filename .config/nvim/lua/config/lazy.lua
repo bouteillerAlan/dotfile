@@ -122,6 +122,32 @@ require("lazy").setup({
           nerd_font_variant = 'mono'
         },
         signature = { enabled = true },
+        completion = {
+          menu = {
+            draw = {
+              columns = {
+                { "kind_icon" },
+                { "label", "label_description", gap = 1 },
+                { "kind", "source_name", gap = 1 },
+              },
+              treesitter = { 'lsp' },
+              components = {
+                kind = { -- show only Fu in place of Function for example
+                  text = function(ctx)
+                    return '[' .. ctx.kind:sub(1, 2) .. ']'
+                  end,
+                }
+              }
+            },
+          },
+          documentation = {
+            auto_show = true,
+            auto_show_delay_ms = 250,
+          },
+          ghost_text = {
+            enabled = false,
+          },
+        },
       },
     },
     {
@@ -143,7 +169,7 @@ vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = "Open parent directory" })
 vim.keymap.set('n', '<space>-', require("oil").toggle_float)
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- special config for lua copy pasted 
+-- special config for lua copy pasted
 -- from https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls 
 vim.lsp.config('lua_ls', {
   on_init = function(client)
@@ -186,30 +212,45 @@ vim.lsp.config('lua_ls', {
   }
 )
 
--- for cssls
---Enable (broadcasting) snippet capability for completion
+-- Enable (broadcasting) snippet capability for completion
 -- local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- Get capabilities from blink.cmp
 local capabilities = require('blink.cmp').get_lsp_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
-vim.lsp.config("cssls", {capabilities=capabilities})
+
+vim.lsp.config("cssls", {capabilities = capabilities})
 vim.lsp.config("html", {capabilities = capabilities})
 vim.lsp.config("jsonls", {capabilities = capabilities})
+vim.lsp.config("dprint", {capabilities = capabilities})
+vim.lsp.config("pyright", {capabilities = capabilities})
+vim.lsp.config("emmet_ls", {capabilities = capabilities})
+vim.lsp.config("bashls", {capabilities = capabilities})
+vim.lsp.config("eslint", {capabilities = capabilities})
+vim.lsp.config("groovyls", {capabilities = capabilities})
+vim.lsp.config("golangci_lint_ls", {capabilities = capabilities})
+vim.lsp.config("emmet_language_server", {capabilities = capabilities})
+vim.lsp.config("codebook", {capabilities = capabilities})
+vim.lsp.config("svelte", {capabilities = capabilities})
+vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
+vim.lsp.config("ts_ls", {capabilities = capabilities})
+vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {'qmlls6'}})
 
--- this lsp has to be installed before hand
-vim.lsp.enable("dprint")
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("pyright")
-vim.lsp.enable("emmet_ls")
-vim.lsp.enable("bashls")
-vim.lsp.enable("eslint")
-vim.lsp.enable("groovyls")
-vim.lsp.enable("golangci_lint_ls")
-vim.lsp.enable("cssls")
-vim.lsp.enable("emmet_language_server")
-vim.lsp.enable("html")
-vim.lsp.enable("codebook")
-vim.lsp.enable("svelte")
-vim.lsp.enable("gh_actions_ls")
-vim.lsp.enable("jsonls")
-vim.lsp.enable("ts_ls")
+-- /!\ this lsp has to be installed before hand
+vim.lsp.enable("dprint") -- yay -S dprint-bin
+vim.lsp.enable("lua_ls") -- yay -S lua-language-server
+vim.lsp.enable("pyright") -- yay -S pyright
+vim.lsp.enable("emmet_ls") -- npm install -g emmet-ls
+vim.lsp.enable("bashls") -- npm i -g bash-language-server
+vim.lsp.enable("eslint") -- npm i -g vscode-langservers-extracted
+vim.lsp.enable("groovyls") -- install java with sdkman and yay -S groovy-language-server-git
+vim.lsp.enable("golangci_lint_ls") -- go install github.com/nametake/golangci-lint-langserver@latest && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+vim.lsp.enable("cssls") -- npm i -g vscode-langservers-extracted
+vim.lsp.enable("emmet_language_server") -- npm install -g @olrtg/emmet-language-server
+vim.lsp.enable("html") -- npm i -g vscode-langservers-extracted
+vim.lsp.enable("codebook") -- pacman -S codebook-lsp
+vim.lsp.enable("svelte") -- npm install -g svelte-language-server
+vim.lsp.enable("gh_actions_ls") -- npm install -g gh-actions-language-server
+vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
+vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
+vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 
