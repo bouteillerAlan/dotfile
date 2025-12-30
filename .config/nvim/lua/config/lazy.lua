@@ -1,3 +1,22 @@
+-- Config by Alan A2n Bouteiller - https://github.com/bouteillerAlan/dotfile
+--
+-- With this config, you got:
+-- - lsp (you need to install server before hand, check the code at the bottom of this file)
+-- - autocompletion
+-- - snippet
+-- - `ff` to search a file or a folder
+-- - `fb` to search a buffer
+-- - `fg` to search a string
+-- - `fh` to search from the help tag
+-- - if you do `/something`, you can navigate the result with `n` and `N` but also hit `esc` to remove the search result
+-- - leader is `space`
+-- - clipboard, relative number, nerdfont are activated
+-- - tabs is 2
+-- - a very simple but powerfull file and folder editor via `oil`, hit `-` and edit/create/delete folder and file name via the same command has any file
+-- - `todo` `hack` and so on are Highlighted, same for hexa color
+-- - with `blink` you got a nice personalized autocomplete UI
+-- - on line git blame
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -83,10 +102,10 @@ require("lazy").setup({
         local hipatterns = require('mini.hipatterns')
         hipatterns.setup({
           highlighters = {
-            fixme = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
-            hack  = { pattern = '%f[%w]()HACK()%f[%W]',  group = 'MiniHipatternsHack'  },
-            todo  = { pattern = '%f[%w]()TODO()%f[%W]',  group = 'MiniHipatternsTodo'  },
-            note  = { pattern = '%f[%w]()NOTE()%f[%W]',  group = 'MiniHipatternsNote'  },
+            fixme = { pattern = '%f[%w]()[Ff][Ii][Xx][Mm][Ee]()%f[%W]', group = 'MiniHipatternsFixme' },
+            hack  = { pattern = '%f[%w]()[Hh][Aa][Cc][Kk]()%f[%W]',  group = 'MiniHipatternsHack'  },
+            todo  = { pattern = '%f[%w]()[Tt][Oo][Dd][Oo]()%f[%W]',  group = 'MiniHipatternsTodo'  },
+            note  = { pattern = '%f[%w]()[Nn][Oo][Tt][Ee]()%f[%W]',  group = 'MiniHipatternsNote'  },
             -- Highlight hex color strings (`#rrggbb`) using that color
             hex_color = hipatterns.gen_highlighter.hex_color(),
           },
