@@ -277,6 +277,7 @@ vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 -- Custom function --
 ---               ---
 
+local term_augroup = vim.api.nvim_create_augroup('TerminalToggle', { clear = true })
 -- open a new window with a terminal in it
 local function toggle_terminal()
   -- create buffer if it doesn't exist
@@ -304,7 +305,24 @@ local function toggle_terminal()
       row = row,
       col = col,
       border = 'rounded',
-      style = 'minimal'
+      style = 'minimal',
+    })
+
+    -- prevent any other buffer to be open in the window
+    -- this is mendatory, because if not set we could lost
+    -- any term open and see it replace by a new buffer
+    -- vim.api.nvim_set_option_value('winfixbuf', true, { win = vim.g.term_win })
+
+    -- auto-close terminal window on buffer leave
+    vim.api.nvim_create_autocmd('BufLeave', {
+      group = term_augroup,
+      buffer = vim.g.term_buf,
+      callback = function()
+        if vim.g.term_win and vim.api.nvim_win_is_valid(vim.g.term_win) then
+          vim.api.nvim_win_hide(vim.g.term_win)
+          vim.g.term_win = nil
+        end
+      end,
     })
 
     -- start terminal if not already started
