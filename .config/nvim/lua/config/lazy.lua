@@ -273,3 +273,51 @@ vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 
+---               ---
+-- Custom function --
+---               ---
+
+-- open a new window with a terminal in it
+local function toggle_terminal()
+  -- create buffer if it doesn't exist
+  if not vim.g.term_buf or not vim.api.nvim_buf_is_valid(vim.g.term_buf) then
+    vim.g.term_buf = vim.api.nvim_create_buf(false, true)
+    vim.g.term_job = nil
+  end
+
+  -- check if window is already open
+  if vim.g.term_win and vim.api.nvim_win_is_valid(vim.g.term_win) then
+    vim.api.nvim_win_hide(vim.g.term_win)
+    vim.g.term_win = nil
+  else
+    -- calculate window size
+    local width = math.floor(vim.o.columns * 0.8)
+    local height = math.floor(vim.o.lines * 0.8)
+    local row = math.floor((vim.o.lines - height) / 2)
+    local col = math.floor((vim.o.columns - width) / 2)
+
+    -- open floating window with the terminal buffer
+    vim.g.term_win = vim.api.nvim_open_win(vim.g.term_buf, true, {
+      relative = 'editor',
+      width = width,
+      height = height,
+      row = row,
+      col = col,
+      border = 'rounded',
+      style = 'minimal'
+    })
+
+    -- start terminal if not already started
+    if not vim.g.term_job then
+      vim.g.term_job = vim.fn.jobstart(vim.o.shell, {
+        term = true,
+        pty = true,
+      })
+    end
+
+    vim.cmd('startinsert')
+  end
+end
+
+vim.keymap.set({'n'}, '<leader>tt', toggle_terminal, { desc = "Toggle a floating terminal" })
+
