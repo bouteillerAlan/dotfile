@@ -82,7 +82,31 @@ require("lazy").setup({
       lazy = false,
       branch = "main",
       build = ":TSUpdate",
-      config = function() require"nvim-treesitter".install { "bash", "rust", "go", "typescript", "javascript", "zig", "html", "scss", "java", "sql", "lua", "json", "markdown", "markdown_inline", "python", "query", "regex", "tsx", "vim", "yaml" } end
+      config = function()
+        require"nvim-treesitter".install {
+          "bash",
+          "rust",
+          "go",
+          "typescript",
+          "javascript",
+          "zig",
+          "html",
+          "scss",
+          "java",
+          "sql",
+          "lua",
+          "json",
+          "markdown",
+          "markdown_inline",
+          "python",
+          "query",
+          "regex",
+          "tsx",
+          "vim",
+          "yaml",
+          "toml"
+        }
+      end
     },
     {
       "nvim-java/nvim-java", config = function()
@@ -257,7 +281,8 @@ vim.lsp.config("cssls", {capabilities = capabilities})
 vim.lsp.config("html", {capabilities = capabilities})
 vim.lsp.config("jsonls", {capabilities = capabilities})
 vim.lsp.config("dprint", {capabilities = capabilities})
-vim.lsp.config("pyright", {capabilities = capabilities})
+-- vim.lsp.config("pyright", {capabilities = capabilities})
+vim.lsp.config("ruff", {capabilities = capabilities})
 vim.lsp.config("emmet_ls", {capabilities = capabilities})
 vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("eslint", {capabilities = capabilities})
@@ -273,7 +298,8 @@ vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 -- /!\ this lsp has to be installed before hand
 vim.lsp.enable("dprint") -- yay -S dprint-bin
 vim.lsp.enable("lua_ls") -- yay -S lua-language-server
-vim.lsp.enable("pyright") -- yay -S pyright
+-- vim.lsp.enable("pyright") -- yay -S pyright
+vim.lsp.enable("ruff") -- pip install ruff or sudo pacman -S ruff
 vim.lsp.enable("emmet_ls") -- npm install -g emmet-ls
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("eslint") -- npm i -g vscode-langservers-extracted
