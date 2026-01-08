@@ -1,0 +1,40 @@
+mode = "local"
+project = ""
+shell = ""
+
+[dirs]
+project = []
+python = "isolated"
+data = "/home/a2n/.local/share/hatch"
+cache = "/home/a2n/.cache/hatch"
+
+[dirs.env]
+
+[projects]
+
+[publish.index]
+repo = "main"
+
+[template]
+name = "Bouteiller [a2n] Alan"
+email = "a2n.dev@pm.me"
+
+[template.licenses]
+headers = true
+default = [
+    "AGPL-3.0-or-later",
+]
+
+[template.plugins.default]
+tests = true
+ci = false
+src-layout = false
+
+[terminal.styles]
+info = "bold"
+success = "bold cyan"
+error = "bold red"
+warning = "bold yellow"
+waiting = "bold magenta"
+debug = "bold"
+spinner = "simpleDotsScrolling"
