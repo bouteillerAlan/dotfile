@@ -209,24 +209,75 @@ require("lazy").setup({
         },
       },
     },
+    -- replaced by lsp saga if i like it better
+    -- { 
+    --   "dgagn/diagflow.nvim",
+    --   opts = {
+    --     event = "LspAttach",
+    --     show_borders = true,
+    --
+    --   }
+    -- },
     {
-      "dgagn/diagflow.nvim",
-      opts = {}
+      "CrestNiraj12/compress-size.nvim",
+      opts = {},
     },
+    {
+      "nvimdev/lspsaga.nvim",
+      config = function()
+        require("lspsaga").setup({
+          lightbulb = {
+            enable = false
+          },
+          implement = {
+            enable = true,
+            sign = true,
+            virtual_text = false,
+          }
+        })
+      end,
+      dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "nvim-tree/nvim-web-devicons",
+      }
+    }
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
 })
 
+---        ---
+-- Shortcut --
+---        ---
+-- telescope
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
-
+-- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
-vim.keymap.set("n", "<space>-", require("oil").toggle_float)
+vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
+-- remove search highlight
 vim.keymap.set("n", "<esc>", "<cmd>nohlsearch<CR>")
+-- lspsaga
+-- loop over each one of the diag
+vim.keymap.set('n', '[d', '<cmd>Lspsaga diagnostic_jump_next<CR>')
+vim.keymap.set('n', ']d', '<cmd>Lspsaga diagnostic_jump_prev<CR>')
+-- loop only over error diag
+vim.keymap.set("n", "[D", function()
+  require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+end)
+vim.keymap.set("n", "[D", function()
+  require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+end)
+-- show doc and implementation
+vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc<CR>')
+vim.keymap.set('n', '<leader>K', '<cmd>Lspsaga finder imp<CR>')
+
+---                  ---
+-- LSP & other config --
+---                  ---
 
 -- special config for lua copy pasted
 -- from https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls 
