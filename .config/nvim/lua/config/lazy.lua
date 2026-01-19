@@ -17,7 +17,8 @@
 -- - with `blink` you got a nice personalized autocomplete UI
 -- - on line git blame
 -- - `leader tt` to toggle a floating terminal that conserve it's state
--- - `[d` and `]d` to navigate diagnostic
+-- - `[d` and `]d` to navigate all diagnostic and `[D` `]D` to loop over the error one
+-- - `K` give you the description and `leader K` the implementation
 --
 -- Some reminder:
 -- - `:%s/string/string/g(c)` to replace all or with `c` to confirm
@@ -75,7 +76,18 @@ require("lazy").setup({
     {
       "nvim-lualine/lualine.nvim",
       dependencies = { "nvim-tree/nvim-web-devicons" },
-      config = function() require("lualine").setup() end
+      config = function()
+        require("lualine").setup({
+          sections = {
+            lualine_c = {
+              "filename",
+              function()
+                return require("compress_size").status()
+              end,
+            },
+          },
+        })
+      end
     },
     {
       "nvim-treesitter/nvim-treesitter",
@@ -104,7 +116,8 @@ require("lazy").setup({
           "tsx",
           "vim",
           "yaml",
-          "toml"
+          "toml",
+          "qmljs"
         }
       end
     },
@@ -209,38 +222,59 @@ require("lazy").setup({
         },
       },
     },
-    -- replaced by lsp saga if i like it better
-    -- { 
-    --   "dgagn/diagflow.nvim",
-    --   opts = {
-    --     event = "LspAttach",
-    --     show_borders = true,
-    --
-    --   }
-    -- },
+    {
+      "dgagn/diagflow.nvim",
+      opts = {
+        show_sign = true,
+        event = "LspAttach",
+        show_borders = false,
+        placement = "inline"
+      }
+    },
+    {
+      "folke/trouble.nvim",
+      opts = {
+        focus = true
+      },
+      cmd = "Trouble",
+      keys = {
+        {
+          "<leader>dd",
+          "<cmd>Trouble diagnostics toggle<cr>",
+          desc = "Diagnostics (Trouble)",
+        },
+        {
+          "<leader>dD",
+          "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+          desc = "Buffer Diagnostics (Trouble)",
+        },
+        {
+          "<leader>cs",
+          "<cmd>Trouble symbols toggle focus=true<cr>",
+          desc = "Symbols (Trouble)",
+        },
+        {
+          "<leader>K",
+          "<cmd>Trouble lsp toggle win.position=right<cr>",
+          desc = "LSP Definitions / references / ... (Trouble)",
+        },
+        {
+          "<leader>xL",
+          "<cmd>Trouble loclist toggle<cr>",
+          desc = "Location List (Trouble)",
+        },
+        {
+          "<leader>dq",
+          "<cmd>Trouble qflist toggle<cr>",
+          desc = "Quickfix List (Trouble)",
+        },
+      },
+    },
     {
       "CrestNiraj12/compress-size.nvim",
       opts = {},
+      config = function () require("compress_size").setup() end
     },
-    {
-      "nvimdev/lspsaga.nvim",
-      config = function()
-        require("lspsaga").setup({
-          lightbulb = {
-            enable = false
-          },
-          implement = {
-            enable = true,
-            sign = true,
-            virtual_text = false,
-          }
-        })
-      end,
-      dependencies = {
-        "nvim-treesitter/nvim-treesitter",
-        "nvim-tree/nvim-web-devicons",
-      }
-    }
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
@@ -262,18 +296,18 @@ vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
 vim.keymap.set("n", "<esc>", "<cmd>nohlsearch<CR>")
 -- lspsaga
 -- loop over each one of the diag
-vim.keymap.set('n', '[d', '<cmd>Lspsaga diagnostic_jump_next<CR>')
-vim.keymap.set('n', ']d', '<cmd>Lspsaga diagnostic_jump_prev<CR>')
+-- vim.keymap.set('n', '[d', '<cmd>Lspsaga diagnostic_jump_next<CR>')
+-- vim.keymap.set('n', ']d', '<cmd>Lspsaga diagnostic_jump_prev<CR>')
 -- loop only over error diag
-vim.keymap.set("n", "[D", function()
-  require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
-end)
-vim.keymap.set("n", "[D", function()
-  require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
-end)
+-- vim.keymap.set("n", "[D", function()
+--   require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+-- end)
+-- vim.keymap.set("n", "[D", function()
+--   require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+-- end)
 -- show doc and implementation
-vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc<CR>')
-vim.keymap.set('n', '<leader>K', '<cmd>Lspsaga finder imp<CR>')
+-- vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc<CR>')
+-- vim.keymap.set('n', '<leader>K', '<cmd>Lspsaga finder imp<CR>')
 
 ---                  ---
 -- LSP & other config --
@@ -332,7 +366,7 @@ vim.lsp.config("cssls", {capabilities = capabilities})
 vim.lsp.config("html", {capabilities = capabilities})
 vim.lsp.config("jsonls", {capabilities = capabilities})
 vim.lsp.config("dprint", {capabilities = capabilities})
--- vim.lsp.config("pyright", {capabilities = capabilities})
+vim.lsp.config("pyright", {capabilities = capabilities})
 vim.lsp.config("ruff", {capabilities = capabilities})
 vim.lsp.config("emmet_ls", {capabilities = capabilities})
 vim.lsp.config("bashls", {capabilities = capabilities})
@@ -345,11 +379,13 @@ vim.lsp.config("svelte", {capabilities = capabilities})
 vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
 vim.lsp.config("ts_ls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
+vim.lsp.config("bashls", {capabilities = capabilities})
 
 -- /!\ this lsp has to be installed before hand
+vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("dprint") -- yay -S dprint-bin
 vim.lsp.enable("lua_ls") -- yay -S lua-language-server
--- vim.lsp.enable("pyright") -- yay -S pyright
+vim.lsp.enable("pyright") -- yay -S pyright
 vim.lsp.enable("ruff") -- pip install ruff or sudo pacman -S ruff
 vim.lsp.enable("emmet_ls") -- npm install -g emmet-ls
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
@@ -370,6 +406,9 @@ vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 -- Custom function --
 ---               ---
 
+--
+-- floating terminal
+--
 local term_augroup = vim.api.nvim_create_augroup("TerminalToggle", { clear = true })
 
 -- open a new window with a terminal in it
