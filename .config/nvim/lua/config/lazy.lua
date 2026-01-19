@@ -261,6 +261,10 @@ require("lazy").setup({
       opts = {},
       config = function () require("compress_size").setup() end
     },
+    {
+      "smjonas/inc-rename.nvim",
+      opts = {}
+    }
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
@@ -276,14 +280,18 @@ vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live gr
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
 vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", { desc = "Telescope todo list" })
+
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
+
 -- remove search highlight
 vim.keymap.set("n", "<esc>", "<cmd>nohlsearch<CR>")
+
 -- todo list
 vim.keymap.set("n", "]t", function() require("todo-comments").jump_next() end, { desc = "Next todo comment" })
 vim.keymap.set("n", "[t", function() require("todo-comments").jump_prev() end, { desc = "Previous todo comment" })
+
 -- trouble
 vim.keymap.set("n", "<leader>dd", "<cmd>Trouble diagnostics toggle<cr>", {desc = "Diagnostics (Trouble)"})
 vim.keymap.set("n", "<leader>dD", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", {desc = "Buffer Diagnostics (Trouble)"})
@@ -291,6 +299,24 @@ vim.keymap.set("n", "<leader>cs", "<cmd>Trouble symbols toggle focus=true<cr>", 
 vim.keymap.set("n", "<leader>K", "<cmd>Trouble lsp toggle win.position=right<cr>", {desc = "LSP Definitions / references / ... (Trouble)"})
 vim.keymap.set("n", "<leader>xL", "<cmd>Trouble loclist toggle<cr>", {desc = "Location List (Trouble)"})
 vim.keymap.set("n", "<leader>dq", "<cmd>Trouble qflist toggle<cr>", {desc = "Quickfix List (Trouble)"})
+
+-- rename
+-- this one show the old value in the prompt, useful to edit it for example
+vim.keymap.set("n", "<leader>rn", function() return ":IncRename " .. vim.fn.expand("<cword>") end, { expr = true })
+-- vim.keymap.set("n", "<leader>rn", ":IncRename ")
+
+-- LSP navigation with Trouble integration
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(args)
+    local opts = { buffer = args.buf }
+    -- goto def is <C> ] that I prefer because we can use <C> t to go back
+    -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'LSP Declaration' }))
+    vim.keymap.set('n', 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
+    vim.keymap.set('n', 'gr', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
+    vim.keymap.set('n', 'gy', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
+  end
+})
 
 ---                  ---
 -- LSP & other config --
@@ -393,7 +419,7 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
     vim.wo[0][0].foldmethod = 'expr'
     vim.wo[0][0].foldlevel = 99  -- Open all folds by default
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    -- vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end
 })
 
