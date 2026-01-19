@@ -28,6 +28,8 @@
 -- - indent with `=`
 -- - delete all ligne that contain "test": `:g/test/norm dd`
 -- `%` on `{` (for example) go to the closing/openning one
+-- za to fold/unfold
+-- zR/zM to un/fold all
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -62,6 +64,8 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.colorcolumn = "80"
+-- allow to fold/unfold code block
+-- vim.opt.foldmethod = "syntax" >> treesitter provide it
 -- show trailling space
 vim.opt.list = true
 vim.opt.listchars = { trail = "*", nbsp = "+"}
@@ -380,6 +384,17 @@ vim.lsp.enable("gh_actions_ls") -- npm install -g gh-actions-language-server
 vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
+
+-- treesitter special config --
+-- folding & indent
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = '*',
+  callback = function()
+    vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    vim.wo[0][0].foldmethod = 'expr'
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end
+})
 
 ---               ---
 -- Custom function --
