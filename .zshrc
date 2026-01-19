@@ -7,7 +7,7 @@ zstyle ':omz:update' frequency 3
 DISABLE_AUTO_TITLE="false"
 ENABLE_CORRECTION="false"
 
-plugins=(git zoxide colorize docker docker-compose heroku nvm yarn ruby zsh-syntax-highlighting zsh-autosuggestions dockolor poetry)
+plugins=(git zoxide colorize docker docker-compose heroku nvm yarn ruby zsh-syntax-highlighting zsh-autosuggestions dockolor poetry uv)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -21,7 +21,10 @@ alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- 
 alias batt="cat /sys/class/power_supply/BAT0/capacity"
 
 # source the env for rust
-. "$HOME/.cargo/env"
+#. "$HOME/.cargo/env"
+
+# volta
+export PATH="$HOME/.volta/bin:$PATH"
 
 # go
 export PATH="$PATH:/usr/local/go/bin"
@@ -64,8 +67,26 @@ esac
 # pnpm end
 
 # deno
-. "/home/a2n/.deno/env"
+#. "/home/a2n/.deno/env"
 
 # add Pulumi to the PATH
 export PATH=$PATH:/home/a2n/.pulumi/bin
 
+# bun completions
+[ -s "/home/a2n/.bun/_bun" ] && source "/home/a2n/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Created by `pipx` on 2025-12-18 09:47:55
+export PATH="$PATH:$HOME/.local/bin"
+
+# force the terminal to use zen browser
+export BROWSER=zen-browser
+
+# doom emacs
+export PATH="$PATH:$HOME/.config/emacs/bin"
+
+# opencode
+export PATH=/home/a2n/.opencode/bin:$PATH
