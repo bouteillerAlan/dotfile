@@ -131,8 +131,13 @@ require("lazy").setup({
         vim.lsp.enable("jdtls")
       end,
     },
-    { "neovim/nvim-lspconfig" },
-    { "nvim-telescope/telescope-fzf-native.nvim", build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install" },
+    {
+      "neovim/nvim-lspconfig"
+    },
+    {
+      "nvim-telescope/telescope-fzf-native.nvim",
+      build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install"
+    },
     {
       "nvim-telescope/telescope.nvim",
       tag = "v0.1.9",
@@ -150,8 +155,14 @@ require("lazy").setup({
         require("telescope").load_extension("node_modules")
       end
     },
-    { "tpope/vim-fugitive" },
-    { "nvim-mini/mini.animate", version = "*", config = function() require("mini.animate").setup() end },
+    {
+      "tpope/vim-fugitive"
+    },
+    {
+      "nvim-mini/mini.animate",
+      version = "*",
+      config = function() require("mini.animate").setup() end
+    },
     {
       "folke/todo-comments.nvim",
       dependencies = { "nvim-lua/plenary.nvim" },
@@ -183,12 +194,31 @@ require("lazy").setup({
         })
       end
     },
-    { "nvim-mini/mini.icons", version = "*", config = function() require("mini.icons").setup() end },
-    { "nvim-mini/mini.pairs", version = "*", config = function() require("mini.pairs").setup() end },
-    { "nvim-mini/mini.diff", version = "*", config = function() require("mini.diff").setup({view={style="number"}}) end },
-    { "mfussenegger/nvim-dap" },
-    { "dstein64/vim-startuptime" },
-    { "lewis6991/gitsigns.nvim", config = function() require("gitsigns").setup({current_line_blame = true}) end },
+    {
+      "nvim-mini/mini.icons",
+      version = "*",
+      config = function() require("mini.icons").setup() end
+    },
+    {
+      "nvim-mini/mini.pairs",
+      version = "*",
+      config = function() require("mini.pairs").setup() end
+    },
+    {
+      "nvim-mini/mini.diff",
+      version = "*",
+      config = function() require("mini.diff").setup({view={style="number"}}) end
+    },
+    {
+      "mfussenegger/nvim-dap"
+    },
+    {
+      "dstein64/vim-startuptime"
+    },
+    {
+      "lewis6991/gitsigns.nvim",
+      config = function() require("gitsigns").setup({current_line_blame = true}) end
+    },
     {
       "stevearc/oil.nvim",
       opts = {},
@@ -211,7 +241,7 @@ require("lazy").setup({
         appearance = {
           nerd_font_variant = "mono"
         },
-        signature = { enabled = true },
+        signature = { enabled = true, trigger = { enabled = true } },
         completion = {
           menu = {
             draw = {
@@ -293,12 +323,11 @@ vim.keymap.set("n", "]t", function() require("todo-comments").jump_next() end, {
 vim.keymap.set("n", "[t", function() require("todo-comments").jump_prev() end, { desc = "Previous todo comment" })
 
 -- trouble
-vim.keymap.set("n", "<leader>dd", "<cmd>Trouble diagnostics toggle<cr>", {desc = "Diagnostics (Trouble)"})
-vim.keymap.set("n", "<leader>dD", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", {desc = "Buffer Diagnostics (Trouble)"})
-vim.keymap.set("n", "<leader>cs", "<cmd>Trouble symbols toggle focus=true<cr>", {desc = "Symbols (Trouble)"})
-vim.keymap.set("n", "<leader>K", "<cmd>Trouble lsp toggle win.position=right<cr>", {desc = "LSP Definitions / references / ... (Trouble)"})
-vim.keymap.set("n", "<leader>xL", "<cmd>Trouble loclist toggle<cr>", {desc = "Location List (Trouble)"})
-vim.keymap.set("n", "<leader>dq", "<cmd>Trouble qflist toggle<cr>", {desc = "Quickfix List (Trouble)"})
+vim.keymap.set("n", "<leader>dD", "<cmd>Trouble diagnostics toggle<cr>", {desc = "Diagnostics (Trouble)"})
+vim.keymap.set("n", "<leader>dd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", {desc = "Buffer Diagnostics (Trouble)"})
+vim.keymap.set("n", "<leader>ts", "<cmd>Trouble symbols toggle focus=true<cr>", {desc = "Symbols (Trouble)"})
+vim.keymap.set("n", "<leader>tl", "<cmd>Trouble loclist toggle<cr>", {desc = "Location List (Trouble)"})
+vim.keymap.set("n", "<leader>tq", "<cmd>Trouble qflist toggle<cr>", {desc = "Quickfix List (Trouble)"})
 
 -- rename
 -- this one show the old value in the prompt, useful to edit it for example
@@ -309,11 +338,11 @@ vim.keymap.set("n", "<leader>rn", function() return ":IncRename " .. vim.fn.expa
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)
     local opts = { buffer = args.buf }
-    -- goto def is <C> ] that I prefer because we can use <C> t to go back
+    -- goto def is <C-]> that I prefer because we can use <C-t> to go back
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'LSP Declaration' }))
     vim.keymap.set('n', 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
-    vim.keymap.set('n', 'gr', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
+    vim.keymap.set('n', '<C-[>', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
     vim.keymap.set('n', 'gy', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
   end
 })
