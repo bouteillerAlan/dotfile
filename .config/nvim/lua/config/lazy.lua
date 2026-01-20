@@ -426,8 +426,10 @@ vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
 vim.lsp.config("ts_ls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
+vim.lsp.config("sqls", {capabilities = capabilities})
 
 -- /!\ this lsp has to be installed before hand
+vim.lsp.enable("sqls") -- go install github.com/sqls-server/sqls@latest
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("dprint") -- yay -S dprint-bin
 vim.lsp.enable("lua_ls") -- yay -S lua-language-server
