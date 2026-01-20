@@ -300,6 +300,50 @@ require("lazy").setup({
       "smjonas/inc-rename.nvim",
       opts = {}
     },
+    {
+      "TheNoeTrevino/haunt.nvim",
+      init = function()
+        local haunt = require("haunt.api")
+        local haunt_picker = require("haunt.picker")
+        local map = vim.keymap.set
+        local prefix = "<leader>h"
+
+        -- annotations
+        map("n", prefix .. "a", function()
+          haunt.annotate()
+        end, { desc = "Annotate" })
+
+        map("n", prefix .. "t", function()
+          haunt.toggle_annotation()
+        end, { desc = "Toggle annotation" })
+
+        map("n", prefix .. "T", function()
+          haunt.toggle_all_lines()
+        end, { desc = "Toggle all annotations" })
+
+        map("n", prefix .. "d", function()
+          haunt.delete()
+        end, { desc = "Delete bookmark" })
+
+        map("n", prefix .. "C", function()
+          haunt.clear_all()
+        end, { desc = "Delete all bookmarks" })
+
+        -- move
+        map("n", prefix .. "p", function()
+          haunt.prev()
+        end, { desc = "Previous bookmark" })
+
+        map("n", prefix .. "n", function()
+          haunt.next()
+        end, { desc = "Next bookmark" })
+
+        -- picker
+        map("n", prefix .. "l", function()
+          haunt_picker.show()
+        end, { desc = "Show Picker" })
+      end,
+    }
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
