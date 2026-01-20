@@ -144,6 +144,7 @@ require("lazy").setup({
       dependencies = {
         "nvim-lua/plenary.nvim",
         "nvim-telescope/telescope-node-modules.nvim",
+        "smartpde/telescope-recent-files",
       },
       config = function()
         require("telescope").setup({
@@ -151,8 +152,14 @@ require("lazy").setup({
             layout_strategy = "vertical",
             layout_config = { height = 0.95 },
           },
+          extensions = {
+            recent_files = {
+              only_cwd = true
+            }
+          }
         })
         require("telescope").load_extension("node_modules")
+        require("telescope").load_extension("recent_files")
       end
     },
     {
@@ -183,11 +190,6 @@ require("lazy").setup({
         local hipatterns = require("mini.hipatterns")
         hipatterns.setup({
           highlighters = {
-            -- replaced by folke/todo-comments.nvim but still here for color hex
-            -- fixme = { pattern = "%f[%w]()[Ff][Ii][Xx][Mm][Ee]()%f[%W]", group = "MiniHipatternsFixme" },
-            -- hack  = { pattern = "%f[%w]()[Hh][Aa][Cc][Kk]()%f[%W]",  group = "MiniHipatternsHack"  },
-            -- todo  = { pattern = "%f[%w]()[Tt][Oo][Dd][Oo]()%f[%W]",  group = "MiniHipatternsTodo"  },
-            -- note  = { pattern = "%f[%w]()[Nn][Oo][Tt][Ee]()%f[%W]",  group = "MiniHipatternsNote"  },
             -- Highlight hex color strings (`#rrggbb`) using that color
             hex_color = hipatterns.gen_highlighter.hex_color(),
           },
@@ -282,7 +284,10 @@ require("lazy").setup({
     {
       "folke/trouble.nvim",
       opts = {
-        focus = true
+        focus = true,
+        keys = {
+          ["<esc>"] = "close",
+        }
       },
       cmd = "Trouble",
     },
@@ -294,7 +299,7 @@ require("lazy").setup({
     {
       "smjonas/inc-rename.nvim",
       opts = {}
-    }
+    },
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
@@ -305,11 +310,14 @@ require("lazy").setup({
 ---        ---
 -- telescope
 local builtin = require("telescope.builtin")
-vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
-vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
-vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
-vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
-vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", { desc = "Telescope todo list" })
+vim.keymap.set("n", "<leader>ff", builtin.find_files, {desc = "Telescope find files"})
+vim.keymap.set("n", "<leader>fg", builtin.live_grep, {desc = "Telescope live grep"})
+vim.keymap.set("n", "<leader>fb", builtin.buffers, {desc = "Telescope buffers"})
+vim.keymap.set("n", "<leader>fh", builtin.help_tags, {desc = "Telescope help tags"})
+-- for todo list
+vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", {desc = "Telescope todo list"})
+-- for recent file
+vim.keymap.set("n", "<Leader>fr", "<cmd>lua require('telescope').extensions.recent_files.pick()<CR>", {desc = "telescope recent file"})
 
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
@@ -342,8 +350,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'LSP Declaration' }))
     vim.keymap.set('n', 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
-    vim.keymap.set('n', '<C-[>', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
-    vim.keymap.set('n', 'gy', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
+    vim.keymap.set('n', 'gr', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
+    vim.keymap.set('n', 'gt', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
   end
 })
 
