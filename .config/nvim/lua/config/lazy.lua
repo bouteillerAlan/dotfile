@@ -278,7 +278,7 @@ require("lazy").setup({
         show_sign = true,
         event = "LspAttach",
         show_borders = false,
-        placement = "inline"
+        -- placement = "inline"
       }
     },
     {
@@ -302,6 +302,7 @@ require("lazy").setup({
     },
     {
       "TheNoeTrevino/haunt.nvim",
+      opts = {picker="telescope"},
       init = function()
         local haunt = require("haunt.api")
         local haunt_picker = require("haunt.picker")
@@ -313,10 +314,6 @@ require("lazy").setup({
           haunt.annotate()
         end, { desc = "Annotate" })
 
-        map("n", prefix .. "t", function()
-          haunt.toggle_annotation()
-        end, { desc = "Toggle annotation" })
-
         map("n", prefix .. "T", function()
           haunt.toggle_all_lines()
         end, { desc = "Toggle all annotations" })
@@ -324,10 +321,6 @@ require("lazy").setup({
         map("n", prefix .. "d", function()
           haunt.delete()
         end, { desc = "Delete bookmark" })
-
-        map("n", prefix .. "C", function()
-          haunt.clear_all()
-        end, { desc = "Delete all bookmarks" })
 
         -- move
         map("n", prefix .. "p", function()
@@ -342,6 +335,25 @@ require("lazy").setup({
         map("n", prefix .. "l", function()
           haunt_picker.show()
         end, { desc = "Show Picker" })
+
+        -- quickfix
+        map("n", prefix .. "q", function()
+          haunt.to_quickfix()
+        end, { desc = "Send Hauntings to QF Lix (buffer)" })
+
+        map("n", prefix .. "Q", function()
+          haunt.to_quickfix({ current_buffer = true })
+        end, { desc = "Send Hauntings to QF Lix (all)" })
+
+        -- yank
+        map("n", prefix .. "y", function()
+          haunt.yank_locations({current_buffer = true})
+        end, { desc = "Send Hauntings to Clipboard (buffer)" })
+
+        map("n", prefix .. "Y", function()
+          haunt.yank_locations()
+        end, { desc = "Send Hauntings to Clipboard (all)" })
+
       end,
     }
   },
@@ -394,7 +406,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'LSP Declaration' }))
     vim.keymap.set('n', 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
-    vim.keymap.set('n', 'gr', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
+    vim.keymap.set('n', '<leader>K', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
     vim.keymap.set('n', 'gt', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
   end
 })
@@ -404,7 +416,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 ---                  ---
 
 -- special config for lua copy pasted
--- from https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls 
+-- from https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#lua_ls
 vim.lsp.config("lua_ls", {
   on_init = function(client)
     if client.workspace_folders then
@@ -471,8 +483,17 @@ vim.lsp.config("ts_ls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("sqls", {capabilities = capabilities})
+vim.lsp.config('groovyls', {
+  cmd = {
+    "java",
+    "-jar",
+    "/usr/share/java/groovy-language-server/groovy-language-server-all.jar",
+  },
+  capabilities = capabilities,
+})
 
 -- /!\ this lsp has to be installed before hand
+vim.lsp.enable("groovyls") -- yay -S groovy-language-server-git
 vim.lsp.enable("sqls") -- go install github.com/sqls-server/sqls@latest
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("dprint") -- yay -S dprint-bin
