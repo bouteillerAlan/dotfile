@@ -68,7 +68,7 @@ vim.opt.colorcolumn = "80"
 -- vim.opt.foldmethod = "syntax" >> treesitter provide it
 -- show trailling space
 vim.opt.list = true
-vim.opt.listchars = { trail = "*", nbsp = "+"}
+vim.opt.listchars = { trail = "*", nbsp = "+", tab = string.rep(" ", vim.o.tabstop)}
 vim.opt.undofile = true -- keep the history of undo
 vim.opt.ignorecase = true -- in searching
 vim.opt.scrolloff = 20
@@ -355,6 +355,36 @@ require("lazy").setup({
         end, { desc = "Send Hauntings to Clipboard (all)" })
 
       end,
+    },
+    {
+      "goolord/alpha-nvim",
+      dependencies = {
+        "nvim-mini/mini.icons",
+        "nvim-lua/plenary.nvim",
+      },
+      config = function()
+        local alpha = require("alpha")
+        local theta = require("alpha.themes.theta")
+        local dashboard = require("alpha.themes.dashboard")
+
+        theta.buttons.val = {
+          dashboard.button("e", "  New file", ":ene <BAR> startinsert<CR>"),
+          dashboard.button("SPC f f", "  Find file", ":Telescope find_files<CR>"),
+          dashboard.button("SPC f r", "  Recent files", ":Telescope oldfiles<CR>"),
+          dashboard.button("SPC f g", "󰱼  Live grep", ":Telescope live_grep<CR>"),
+          dashboard.button("u", "󰚰  Update plugins", ":Lazy sync<CR>"),
+          dashboard.button("q", "󰩈  Quit", ":qa<CR>"),
+        }
+
+        alpha.setup(theta.config)
+      end,
+    },
+    {
+      "mbbill/undotree",
+      config = function()
+        vim.g.undotree_WindowLayout = 2
+        vim.g.undotree_SetFocusWhenToggle = 1
+      end,
     }
   },
   -- automatically check for plugin updates
@@ -410,6 +440,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gt', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
   end
 })
+
+-- undotree
+vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle)
 
 ---                  ---
 -- LSP & other config --
