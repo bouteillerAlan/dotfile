@@ -385,7 +385,21 @@ require("lazy").setup({
         vim.g.undotree_WindowLayout = 2
         vim.g.undotree_SetFocusWhenToggle = 1
       end,
-    }
+    },
+    {
+      "BlinkResearchLabs/blink-edit.nvim",
+      config = function()
+        require("blink-edit").setup({
+          llm = {
+            provider = "sweep",
+            backend = "openai",
+            url = "http://localhost:8000",
+            model = "sweep",
+          },
+        })
+
+      end,
+    },
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
@@ -429,13 +443,13 @@ vim.keymap.set("n", "<leader>rn", function() return ":IncRename " .. vim.fn.expa
 -- vim.keymap.set("n", "<leader>rn", ":IncRename ")
 
 -- LSP navigation with Trouble integration
-vim.api.nvim_create_autocmd('LspAttach', {
+vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local opts = { buffer = args.buf }
     -- goto def is <C-]> that I prefer because we can use <C-t> to go back
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'LSP Declaration' }))
-    vim.keymap.set('n', 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = "LSP Declaration" }))
+    vim.keymap.set("n", 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
     vim.keymap.set('n', '<leader>K', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
     vim.keymap.set('n', 'gt', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
   end
@@ -443,6 +457,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- undotree
 vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle)
+
+-- custom one
+vim.keymap.set('n', '<C-z>', '<cmd>undo<cr>', {desc = 'undo one change'})
 
 ---                  ---
 -- LSP & other config --
