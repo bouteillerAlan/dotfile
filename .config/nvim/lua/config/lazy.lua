@@ -548,9 +548,8 @@ vim.lsp.config("lua_ls", {
         hint = {
           enable = true,
           paramName = "Disable",
-          paramType = true,
           setType = true,
-          arrayIndex = "Disable", -- no [1] [2] [03] on table entries
+          arrayIndex = "Disable",
           returnAnonymousFunction = true,
         }
       }
@@ -584,8 +583,6 @@ vim.lsp.config("pyright", {
         inlayHints = {
           variableTypes = true,
           functionReturnTypes = true,
-          callArgumentNames = false, -- no param names at call sites
-          pytestParameters = false,
         },
       }
     }
@@ -612,12 +609,9 @@ vim.lsp.config("svelte", {
       plugin = {
         typescript = {
           inlayHints = {
-            parameterNames = { enabled = "none" },
-            parameterTypes = { enabled = true },
-            variableTypes = { enabled = false },
-            propertyDeclarationTypes = { enabled = false },
+            parameterTypes        = { enabled = true },
             functionLikeReturnTypes = { enabled = true },
-            enumMemberValues = { enabled = true },
+            enumMemberValues      = { enabled = true },
           }
         }
       }
@@ -625,6 +619,11 @@ vim.lsp.config("svelte", {
   }
 })
 vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
+local ts_inlay_hints = {
+  includeInlayFunctionParameterTypeHints = true,
+  includeInlayFunctionLikeReturnTypeHints = true,
+  includeInlayEnumMemberValueHints = true,
+}
 vim.lsp.config("ts_ls", {
   capabilities = capabilities,
   init_options = {
@@ -635,28 +634,8 @@ vim.lsp.config("ts_ls", {
     }
   },
   settings = {
-    typescript = {
-      inlayHints = {
-        includeInlayParameterNameHints = "none",
-        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-        includeInlayFunctionParameterTypeHints = true,
-        includeInlayVariableTypeHints = false,
-        includeInlayPropertyDeclarationTypeHints = false,
-        includeInlayFunctionLikeReturnTypeHints = true,
-        includeInlayEnumMemberValueHints = true,
-      }
-    },
-    javascript = {
-      inlayHints = {
-        includeInlayParameterNameHints = "none",
-        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-        includeInlayFunctionParameterTypeHints = true,
-        includeInlayVariableTypeHints = false,
-        includeInlayPropertyDeclarationTypeHints = false,
-        includeInlayFunctionLikeReturnTypeHints = true,
-        includeInlayEnumMemberValueHints = true,
-      }
-    }
+    typescript = { inlayHints = ts_inlay_hints },
+    javascript = { inlayHints = ts_inlay_hints },
   }
 })
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
