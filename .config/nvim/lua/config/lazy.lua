@@ -493,6 +493,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set('n', '<leader>ih', function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }), { bufnr = args.buf })
     end, vim.tbl_extend('force', opts, { desc = 'Toggle inlay hints' }))
+    -- error-only diagnostic navigation ([d/]d for all severities are neovim built-in defaults)
+    vim.keymap.set("n", "]D", function()
+      vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
+    end, vim.tbl_extend("force", opts, { desc = "Next error" }))
+    vim.keymap.set("n", "[D", function()
+      vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
+    end, vim.tbl_extend("force", opts, { desc = "Prev error" }))
+    -- code action / quick fix (visual mode too for range actions e.g. extract)
+    vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
+      vim.tbl_extend("force", opts, { desc = "Code action / quick fix" }))
   end
 })
 
