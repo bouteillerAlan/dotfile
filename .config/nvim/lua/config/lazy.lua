@@ -239,12 +239,19 @@ require("lazy").setup({
       dependencies = { "rafamadriz/friendly-snippets" },
       version = "1.*",
       opts = {
-        keymap = { preset = "default" },
+        keymap = {
+          preset = "default",
+          ['<Tab>'] = { 'select_and_accept', 'fallback' },
+        },
         appearance = {
           nerd_font_variant = "mono"
         },
         signature = { enabled = true, trigger = { enabled = true } },
         completion = {
+          accept = {
+            -- auto add brackets/parens when accepting a function/method completion
+            auto_brackets = { enabled = true },
+          },
           menu = {
             draw = {
               columns = {
@@ -269,6 +276,20 @@ require("lazy").setup({
           ghost_text = {
             enabled = false,
           },
+        },
+        sources = {
+          default = { 'lsp', 'path', 'snippets', 'buffer' },
+          providers = (function()
+            -- offsets shift the fuzzy score to enforce source priority tiers
+            -- gap must stay smaller than a strong fuzzy match (~10-50) so a
+            -- perfect snippet still beats a weak LSP result
+            local tier = 3
+            return {
+              lsp      = { score_offset =  tier     }, -- +3: highest
+              snippets = { score_offset = -tier     }, -- -3: below lsp
+              buffer   = { score_offset = -tier * 2 }, -- -6: last resort
+            }
+          end)(),
         },
       },
     },
@@ -387,17 +408,31 @@ require("lazy").setup({
       end,
     },
     {
-      "BlinkResearchLabs/blink-edit.nvim",
+      "NickvanDyke/opencode.nvim",
+      dependencies = {
+        -- Recommended for `ask()` and `select()`.
+        -- Required for `snacks` provider.
+        -- ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
+        -- { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+      },
       config = function()
-        require("blink-edit").setup({
-          llm = {
-            provider = "sweep",
-            backend = "openai",
-            url = "http://localhost:8000",
-            model = "sweep",
-          },
-        })
+        ---@type opencode.Opts
+        vim.g.opencode_opts = {
+          -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
+        }
 
+        -- Required for `opts.events.reload`.
+        vim.o.autoread = true
+
+        vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+        vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
+        vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+        vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
+        vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
+        vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
+        vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
+        vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+        vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
       end,
     },
   },
@@ -446,12 +481,18 @@ vim.keymap.set("n", "<leader>rn", function() return ":IncRename " .. vim.fn.expa
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local opts = { buffer = args.buf }
+    -- enable inlay hints (inline type info, param names, return types)
+    vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
     -- goto def is <C-]> that I prefer because we can use <C-t> to go back
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = "LSP Declaration" }))
     vim.keymap.set("n", 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
     vim.keymap.set('n', '<leader>K', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
     vim.keymap.set('n', 'gt', function() require('trouble').toggle('lsp_type_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Type Definition' }))
+    -- toggle inlay hints on/off per buffer
+    vim.keymap.set('n', '<leader>ih', function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }), { bufnr = args.buf })
+    end, vim.tbl_extend('force', opts, { desc = 'Toggle inlay hints' }))
   end
 })
 
@@ -503,7 +544,16 @@ vim.lsp.config("lua_ls", {
       })
     end,
     settings = {
-      Lua = {}
+      Lua = {
+        hint = {
+          enable = true,
+          paramName = "Disable",
+          paramType = true,
+          setType = true,
+          arrayIndex = "Disable", -- no [1] [2] [03] on table entries
+          returnAnonymousFunction = true,
+        }
+      }
     },
   }
 )
@@ -518,18 +568,97 @@ vim.lsp.config("cssls", {capabilities = capabilities})
 vim.lsp.config("html", {capabilities = capabilities})
 vim.lsp.config("jsonls", {capabilities = capabilities})
 vim.lsp.config("dprint", {capabilities = capabilities})
-vim.lsp.config("pyright", {capabilities = capabilities})
+vim.lsp.config("pyright", {
+  capabilities = capabilities,
+  settings = {
+    pyright = {
+      -- ruff handles imports, let it own that
+      disableOrganizeImports = true,
+    },
+    python = {
+      analysis = {
+        typeCheckingMode = "basic",
+        -- let ruff handle all linting diagnostics, pyright focuses on types
+        ignore = { "*" },
+        autoImportCompletions = true,
+        inlayHints = {
+          variableTypes = true,
+          functionReturnTypes = true,
+          callArgumentNames = false, -- no param names at call sites
+          pytestParameters = false,
+        },
+      }
+    }
+  }
+})
 vim.lsp.config("ruff", {capabilities = capabilities})
-vim.lsp.config("emmet_ls", {capabilities = capabilities})
+vim.lsp.config("emmet_ls", {
+  capabilities = capabilities,
+  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact" },
+})
 vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("eslint", {capabilities = capabilities})
 vim.lsp.config("groovyls", {capabilities = capabilities})
 vim.lsp.config("golangci_lint_ls", {capabilities = capabilities})
-vim.lsp.config("emmet_language_server", {capabilities = capabilities})
+vim.lsp.config("emmet_language_server", {
+  capabilities = capabilities,
+  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact" },
+})
 vim.lsp.config("codebook", {capabilities = capabilities})
-vim.lsp.config("svelte", {capabilities = capabilities})
+vim.lsp.config("svelte", {
+  capabilities = capabilities,
+  settings = {
+    svelte = {
+      plugin = {
+        typescript = {
+          inlayHints = {
+            parameterNames = { enabled = "none" },
+            parameterTypes = { enabled = true },
+            variableTypes = { enabled = false },
+            propertyDeclarationTypes = { enabled = false },
+            functionLikeReturnTypes = { enabled = true },
+            enumMemberValues = { enabled = true },
+          }
+        }
+      }
+    }
+  }
+})
 vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
-vim.lsp.config("ts_ls", {capabilities = capabilities})
+vim.lsp.config("ts_ls", {
+  capabilities = capabilities,
+  init_options = {
+    preferences = {
+      includeCompletionsForModuleExports = true,
+      includeCompletionsWithInsertText = true,
+      importModuleSpecifierPreference = "shortest",
+    }
+  },
+  settings = {
+    typescript = {
+      inlayHints = {
+        includeInlayParameterNameHints = "none",
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = false,
+        includeInlayPropertyDeclarationTypeHints = false,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+    },
+    javascript = {
+      inlayHints = {
+        includeInlayParameterNameHints = "none",
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = false,
+        includeInlayPropertyDeclarationTypeHints = false,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+    }
+  }
+})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("sqls", {capabilities = capabilities})
@@ -570,6 +699,8 @@ vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 vim.api.nvim_create_autocmd('FileType', {
   pattern = '*',
   callback = function()
+    -- enable treesitter highlighting (new nvim-treesitter main branch no longer does this automatically)
+    pcall(vim.treesitter.start)
     vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
     vim.wo[0][0].foldmethod = 'expr'
     vim.wo[0][0].foldlevel = 99  -- Open all folds by default
