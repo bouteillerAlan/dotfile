@@ -435,6 +435,15 @@ require("lazy").setup({
         vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
       end,
     },
+    {
+      "andymass/vim-matchup",
+      ---@type matchup.Config
+      opts = {
+        treesitter = {
+          stopline = 500,
+        }
+      }
+    }
   },
   -- automatically check for plugin updates
   checker = { enabled = true },
@@ -599,17 +608,20 @@ vim.lsp.config("pyright", {
   }
 })
 vim.lsp.config("ruff", {capabilities = capabilities})
-vim.lsp.config("emmet_ls", {
+-- vim.lsp.config("emmet_ls", {
+--   capabilities = capabilities,
+--   filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact", "typescript", "javascript" },
+-- })
+vim.lsp.config("bashls", {
   capabilities = capabilities,
-  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact" },
+  filetypes = { "zsh", "sh", "bash" }
 })
-vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("eslint", {capabilities = capabilities})
 vim.lsp.config("groovyls", {capabilities = capabilities})
 vim.lsp.config("golangci_lint_ls", {capabilities = capabilities})
 vim.lsp.config("emmet_language_server", {
   capabilities = capabilities,
-  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact" },
+  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact", "typescript", "javascript"  },
 })
 vim.lsp.config("codebook", {capabilities = capabilities})
 vim.lsp.config("svelte", {
@@ -636,6 +648,10 @@ local ts_inlay_hints = {
 }
 vim.lsp.config("ts_ls", {
   capabilities = capabilities,
+  -- anchor ts_ls to the folder containing tsconfig/package.json (e.g. frontend/ in Wails projects)
+  -- so it finds node_modules correctly and auto-imports work
+  root_markers = { "tsconfig.json", "jsconfig.json", "package.json" },
+  filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
   init_options = {
     preferences = {
       includeCompletionsForModuleExports = true,
@@ -668,7 +684,7 @@ vim.lsp.enable("dprint") -- yay -S dprint-bin
 vim.lsp.enable("lua_ls") -- yay -S lua-language-server
 vim.lsp.enable("pyright") -- yay -S pyright
 vim.lsp.enable("ruff") -- pip install ruff or sudo pacman -S ruff
-vim.lsp.enable("emmet_ls") -- npm install -g emmet-ls
+-- vim.lsp.enable("emmet_ls") -- npm install -g emmet-ls
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("eslint") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("groovyls") -- install java with sdkman and yay -S groovy-language-server-git
@@ -684,16 +700,29 @@ vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 
 -- treesitter special config --
+-- use bash parser for zsh files (no dedicated zsh parser)
+vim.treesitter.language.register('bash', 'zsh')
 -- folding & indent
 vim.api.nvim_create_autocmd('FileType', {
   pattern = '*',
   callback = function()
     -- enable treesitter highlighting (new nvim-treesitter main branch no longer does this automatically)
-    pcall(vim.treesitter.start)
-    vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-    vim.wo[0][0].foldmethod = 'expr'
+    local ok = pcall(vim.treesitter.start)
+    if ok then
+      vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+      vim.wo[0][0].foldmethod = 'expr'
+    else
+      vim.wo[0][0].foldmethod = 'indent'
+    end
     vim.wo[0][0].foldlevel = 99  -- Open all folds by default
-    -- vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end
+})
+
+-- treesitter indent for JSX/TSX (fixes = re-indent and Enter auto-indent)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'typescriptreact', 'javascriptreact' },
+  callback = function()
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end
 })
 
