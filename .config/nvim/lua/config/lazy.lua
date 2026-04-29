@@ -76,7 +76,55 @@ vim.opt.scrolloff = 20
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
-    { "catppuccin/nvim", name = "catppuccin", priority = 1000, config = function() vim.cmd.colorscheme "catppuccin" end },
+    -- {
+    --   {
+    --     'milanglacier/minuet-ai.nvim',
+    --     config = function()
+    --       require('minuet').setup {
+    --         -- Your configuration options here
+    --         provider = "openai_fim_compatible",
+    --         n_completions = 1, -- Use 1 for local models to save resources
+    --         context_window = 4096, -- Adjust based on your GPU's capability
+    --         throttle = 500, -- Minimum time between requests in ms
+    --         debounce = 300, -- Wait time after typing stops before requesting
+    --         provider_options = {
+    --           openai_fim_compatible = {
+    --             api_key = "TERM", -- Ollama doesn't need a real API key
+    --             name = "Ollama",
+    --             end_point = "http://localhost:8080/v1/completions",
+    --             model = "JetBrains/Mellum-4b-base-gguf",
+    --             optional = {
+    --               max_tokens = 256, -- Maximum tokens to generate
+    --               stop = { "\n\n" }, -- Stop at double newlines
+    --               top_p = 0.9, -- Nucleus sampling parameter
+    --             },
+    --           },
+    --         },
+    --         -- Virtual text display settings
+    --         virtualtext = {
+    --           auto_trigger_ft = { "*" }, -- Enable for all filetypes
+    --           keymap = {
+    --             accept = "<Tab>",
+    --             accept_line = "<C-y>",
+    --             next = "<C-n>",
+    --             prev = "<C-p>",
+    --             dismiss = "<C-e>",
+    --           },
+    --         }
+    --       }
+    --     end,
+    --   },
+    --   { 'Saghen/blink.cmp' },
+    -- },
+    -- { "catppuccin/nvim", name = "catppuccin", priority = 1000, config = function() vim.cmd.colorscheme "catppuccin" end },
+    -- lua/plugins/rose-pine.lua
+    {
+      "rose-pine/neovim",
+      name = "rose-pine",
+      config = function()
+        vim.cmd("colorscheme rose-pine")
+      end
+    },
     {
       "nvim-lualine/lualine.nvim",
       dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -229,8 +277,8 @@ require("lazy").setup({
               opts.buffer = bufnr
               vim.keymap.set(mode, l, r, opts)
             end
-            map("n", "]g", gs.nav_hunk("next"), { desc = "Next git hunk" })
-            map("n", "[g", gs.nav_hunk("prev"), { desc = "Previous git hunk" })
+            map("n", "]g", function() gs.nav_hunk("next", { buffer = bufnr }) end, { desc = "Next git hunk" })
+            map("n", "[g", function() gs.nav_hunk("prev", { buffer = bufnr }) end, { desc = "Previous git hunk" })
           end,
         })
       end
@@ -694,6 +742,7 @@ vim.lsp.config("ts_ls", {
     javascript = { inlayHints = ts_inlay_hints },
   }
 })
+vim.lsp.config("gopls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
 vim.lsp.config("sqls", {capabilities = capabilities})
@@ -718,6 +767,7 @@ vim.lsp.enable("ruff") -- pip install ruff or sudo pacman -S ruff
 vim.lsp.enable("bashls") -- npm i -g bash-language-server
 vim.lsp.enable("eslint") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("groovyls") -- install java with sdkman and yay -S groovy-language-server-git
+vim.lsp.enable("gopls") -- go install golang.org/x/tools/gopls@latest
 vim.lsp.enable("golangci_lint_ls") -- go install github.com/nametake/golangci-lint-langserver@latest && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 vim.lsp.enable("cssls") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("emmet_language_server") -- npm install -g @olrtg/emmet-language-server
