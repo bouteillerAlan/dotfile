@@ -1,0 +1,10 @@
+# theme = Rose Pine
+# theme = iTerm2 Light Background
+# theme = Rose Pine Dawn
+theme = TokyoNight Night
+confirm-close-surface = false
+
+# ligature
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
