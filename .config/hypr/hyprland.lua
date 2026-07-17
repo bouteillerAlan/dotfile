@@ -46,6 +46,7 @@ local menu        = "rofi -show drun"
 --
 hl.on("hyprland.start", function () 
   hl.exec_cmd("waybar & nm-applet")
+  hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
 end)
 
 
@@ -264,6 +265,7 @@ hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
