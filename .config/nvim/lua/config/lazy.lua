@@ -26,7 +26,7 @@
 -- - `ctrl+]` to go to definition and `ctrl+t` to return back
 -- - `gg` and `G` to move top/bottom
 -- - indent with `=`
--- - delete all ligne that contain "test": `:g/test/norm dd`
+-- - delete all line that contain "test": `:g/test/norm dd`
 -- `%` on `{` (for example) go to the closing/openning one
 -- za to fold/unfold
 -- zR/zM to un/fold all
@@ -76,54 +76,29 @@ vim.opt.scrolloff = 20
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
-    -- {
-    --   {
-    --     'milanglacier/minuet-ai.nvim',
-    --     config = function()
-    --       require('minuet').setup {
-    --         -- Your configuration options here
-    --         provider = "openai_fim_compatible",
-    --         n_completions = 1, -- Use 1 for local models to save resources
-    --         context_window = 4096, -- Adjust based on your GPU's capability
-    --         throttle = 500, -- Minimum time between requests in ms
-    --         debounce = 300, -- Wait time after typing stops before requesting
-    --         provider_options = {
-    --           openai_fim_compatible = {
-    --             api_key = "TERM", -- Ollama doesn't need a real API key
-    --             name = "Ollama",
-    --             end_point = "http://localhost:8080/v1/completions",
-    --             model = "JetBrains/Mellum-4b-base-gguf",
-    --             optional = {
-    --               max_tokens = 256, -- Maximum tokens to generate
-    --               stop = { "\n\n" }, -- Stop at double newlines
-    --               top_p = 0.9, -- Nucleus sampling parameter
-    --             },
-    --           },
-    --         },
-    --         -- Virtual text display settings
-    --         virtualtext = {
-    --           auto_trigger_ft = { "*" }, -- Enable for all filetypes
-    --           keymap = {
-    --             accept = "<Tab>",
-    --             accept_line = "<C-y>",
-    --             next = "<C-n>",
-    --             prev = "<C-p>",
-    --             dismiss = "<C-e>",
-    --           },
-    --         }
-    --       }
-    --     end,
-    --   },
-    --   { 'Saghen/blink.cmp' },
-    -- },
-    -- { "catppuccin/nvim", name = "catppuccin", priority = 1000, config = function() vim.cmd.colorscheme "catppuccin" end },
-    -- lua/plugins/rose-pine.lua
     {
-      "rose-pine/neovim",
-      name = "rose-pine",
+      "folke/tokyonight.nvim",
+      lazy = false,
+      priority = 1000,
+      opts = {},
       config = function()
-        vim.cmd("colorscheme rose-pine")
+        vim.cmd("colorscheme tokyonight-night")
       end
+    },
+    {
+      "laytan/cloak.nvim",
+      config = function ()
+        return require("cloak").setup()
+      end
+    },
+    {
+      "nvim-neotest/neotest",
+      dependencies = {
+        "nvim-neotest/nvim-nio",
+        "nvim-lua/plenary.nvim",
+        "antoinemadec/FixCursorHold.nvim",
+        "nvim-treesitter/nvim-treesitter"
+      }
     },
     {
       "nvim-lualine/lualine.nvim",
@@ -135,6 +110,14 @@ require("lazy").setup({
               "filename",
               function()
                 return require("compress_size").status()
+              end,
+            },
+            lualine_x = {
+              "encoding",
+              "fileformat",
+              "filetype",
+              function()
+                return os.date("%Y-%m-%d %H:%M")
               end,
             },
           },
@@ -169,7 +152,9 @@ require("lazy").setup({
           "vim",
           "yaml",
           "toml",
-          "qmljs"
+          "qmljs",
+          "c",
+          "c_sharp"
         }
       end
     },
@@ -182,6 +167,7 @@ require("lazy").setup({
     {
       "neovim/nvim-lspconfig"
     },
+    -- may need to force the compilation :Lazy build telescope-fzf-native.nvim
     {
       "nvim-telescope/telescope-fzf-native.nvim",
       build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install"
@@ -308,7 +294,7 @@ require("lazy").setup({
         appearance = {
           nerd_font_variant = "mono"
         },
-        signature = { enabled = true, trigger = { enabled = true } },
+        signature = { enabled = true, trigger = { enabled = true, show_on_keyword = true } },
         completion = {
           accept = {
             -- auto add brackets/parens when accepting a function/method completion
@@ -322,13 +308,28 @@ require("lazy").setup({
                 { "kind", "source_name", gap = 1 },
               },
               treesitter = { "lsp" },
-              components = {
-                kind = { -- show only Fu in place of Function for example
-                  text = function(ctx)
-                    return "[" .. ctx.kind:sub(1, 2) .. "]"
-                  end,
-                }
-              }
+              -- components = {
+              --   kind = { -- show only Fu in place of Function for example
+              --     text = function(ctx)
+              --       if ctx.kind == "Function" then
+              --         return "fc()"
+              --       end
+              --       if ctx.kind == "Method" then
+              --         return "Meth"
+              --       end
+              --       if ctx.kind == "Variable" then
+              --         return "var"
+              --       end
+              --       if ctx.kind == "Snippet" then
+              --         return "snip"
+              --       end
+              --       if ctx.kind == "Keyword" then
+              --         return "keyw"
+              --       end
+              --       return ctx.kind
+              --     end,
+              --   }
+              -- }
             },
           },
           documentation = {
@@ -339,20 +340,20 @@ require("lazy").setup({
             enabled = false,
           },
         },
-        sources = {
-          default = { 'lsp', 'path', 'snippets', 'buffer' },
-          providers = (function()
-            -- offsets shift the fuzzy score to enforce source priority tiers
-            -- gap must stay smaller than a strong fuzzy match (~10-50) so a
-            -- perfect snippet still beats a weak LSP result
-            local tier = 3
-            return {
-              lsp      = { score_offset =  tier     }, -- +3: highest
-              snippets = { score_offset = -tier     }, -- -3: below lsp
-              buffer   = { score_offset = -tier * 2 }, -- -6: last resort
-            }
-          end)(),
-        },
+        -- sources = {
+        --   default = { 'lsp', 'path', 'snippets', 'buffer' },
+        --   providers = (function()
+        --     -- offsets shift the fuzzy score to enforce source priority tiers
+        --     -- gap must stay smaller than a strong fuzzy match (~10-50) so a
+        --     -- perfect snippet still beats a weak LSP result
+        --     local tier = 3
+        --     return {
+        --       lsp      = { score_offset =  tier     }, -- +3: highest
+        --       snippets = { score_offset = -tier     }, -- -3: below lsp
+        --       buffer   = { score_offset = -tier * 2 }, -- -6: last resort
+        --     }
+        --   end)(),
+        -- },
       },
     },
     {
@@ -375,12 +376,7 @@ require("lazy").setup({
       cmd = "Trouble",
     },
     {
-      "CrestNiraj12/compress-size.nvim",
-      opts = {},
-      config = function () require("compress_size").setup() end
-    },
-    {
-      "smjonas/inc-rename.nvim",
+    "smjonas/inc-rename.nvim",
       opts = {}
     },
     {
@@ -392,7 +388,7 @@ require("lazy").setup({
         local map = vim.keymap.set
         local prefix = "<leader>h"
 
-        -- annotations
+       -- annotations
         map("n", prefix .. "a", function()
           haunt.annotate()
         end, { desc = "Annotate" })
@@ -470,34 +466,6 @@ require("lazy").setup({
       end,
     },
     {
-      "NickvanDyke/opencode.nvim",
-      dependencies = {
-        -- Recommended for `ask()` and `select()`.
-        -- Required for `snacks` provider.
-        -- ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-        -- { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
-      },
-      config = function()
-        ---@type opencode.Opts
-        vim.g.opencode_opts = {
-          -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
-        }
-
-        -- Required for `opts.events.reload`.
-        vim.o.autoread = true
-
-        vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-        vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-        vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
-        vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
-        vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
-        vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
-        vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
-        vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
-        vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
-      end,
-    },
-    {
       "andymass/vim-matchup",
       ---@type matchup.Config
       opts = {
@@ -524,15 +492,16 @@ require("lazy").setup({
     }
   },
   -- automatically check for plugin updates
-  checker = { enabled = true },
+  checker = { enabled = true, minimum_release_age = "14d" },
 })
 
 ---        ---
 -- Shortcut --
 ---        ---
 -- telescope
+require('telescope').load_extension('fzf')
 local builtin = require("telescope.builtin")
-vim.keymap.set("n", "<leader>ff", builtin.find_files, {desc = "Telescope find files"})
+vim.keymap.set("n", "<leader>ff", function() builtin.find_files({ hidden = true, no_ignore = true }) end, {desc = "Telescope find files"})
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, {desc = "Telescope live grep"})
 vim.keymap.set("n", "<leader>fb", builtin.buffers, {desc = "Telescope buffers"})
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, {desc = "Telescope help tags"})
@@ -588,8 +557,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
     end, vim.tbl_extend("force", opts, { desc = "Prev error" }))
     -- code action / quick fix (visual mode too for range actions e.g. extract)
-    vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
+    vim.keymap.set({ "n", "v" }, "<leader>qf", vim.lsp.buf.code_action,
       vim.tbl_extend("force", opts, { desc = "Code action / quick fix" }))
+    vim.keymap.set("n", "<leader>qfi", function()
+      vim.lsp.buf.code_action({ context = { only = { "source.addMissingImports" } }, apply = true })
+    end, vim.tbl_extend("force", opts, { desc = "Add missing imports" }))
+    vim.keymap.set("n", "<leader>qfa", function()
+      vim.lsp.buf.code_action({ context = { only = { "source.fixAll" } }, apply = true })
+    end, vim.tbl_extend("force", opts, { desc = "Fix all auto-fixable errors" }))
   end
 })
 
@@ -686,10 +661,6 @@ vim.lsp.config("pyright", {
   }
 })
 vim.lsp.config("ruff", {capabilities = capabilities})
--- vim.lsp.config("emmet_ls", {
---   capabilities = capabilities,
---   filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact", "typescript", "javascript" },
--- })
 vim.lsp.config("bashls", {
   capabilities = capabilities,
   filetypes = { "zsh", "sh", "bash" }
@@ -699,7 +670,7 @@ vim.lsp.config("groovyls", {capabilities = capabilities})
 vim.lsp.config("golangci_lint_ls", {capabilities = capabilities})
 vim.lsp.config("emmet_language_server", {
   capabilities = capabilities,
-  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact", "typescript", "javascript"  },
+  filetypes = { "html", "css", "scss", "less", "sass", "typescriptreact", "javascriptreact", "typescript", "javascript" },
 })
 vim.lsp.config("codebook", {capabilities = capabilities})
 vim.lsp.config("svelte", {
@@ -709,9 +680,9 @@ vim.lsp.config("svelte", {
       plugin = {
         typescript = {
           inlayHints = {
-            parameterTypes        = { enabled = true },
+            parameterTypes = { enabled = true },
             functionLikeReturnTypes = { enabled = true },
-            enumMemberValues      = { enabled = true },
+            enumMemberValues = { enabled = true },
           }
         }
       }
@@ -754,6 +725,15 @@ vim.lsp.config('groovyls', {
   },
   capabilities = capabilities,
 })
+-- clangd's semantic tokens override treesitter and rose-pine lacks the
+-- @lsp.type.* groups for C, making everything gray — disable them so
+-- treesitter highlighting takes over
+vim.lsp.config("clangd", {
+  capabilities = capabilities,
+  on_attach = function(client)
+    client.server_capabilities.semanticTokensProvider = nil
+  end,
+})
 
 -- /!\ this lsp has to be installed before hand
 vim.lsp.enable("groovyls") -- yay -S groovy-language-server-git
@@ -778,6 +758,7 @@ vim.lsp.enable("gh_actions_ls") -- npm install -g gh-actions-language-server
 vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
 vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
+vim.lsp.enable("clangd")
 
 -- treesitter special config --
 -- use bash parser for zsh files (no dedicated zsh parser)

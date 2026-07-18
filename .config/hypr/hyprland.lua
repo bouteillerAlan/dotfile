@@ -3,12 +3,14 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- center
 hl.monitor({
     output   = "DP-5",
     mode     = "2560x1440@240",
     position = "0x0",
     scale    = 1,
 })
+-- droite
 hl.monitor({
     output   = "DP-6",
     mode     = "2560x1440@240",
@@ -16,7 +18,7 @@ hl.monitor({
     scale    = 1,
     transform = 3,
 })
--- proart
+-- proart, gauche
 hl.monitor({
     output   = "DP-4",
     mode     = "2560x1440@59.95",
@@ -44,9 +46,15 @@ local menu        = "rofi -show drun"
 -- Autostart necessary processes (like notifications daemons, status bars, etc.)
 -- Or execute your favorite apps at launch like this:
 --
-hl.on("hyprland.start", function () 
-  hl.exec_cmd("waybar & nm-applet & hyprpaper")
+hl.on("hyprland.start", function ()
+  hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
+  hl.exec_cmd("kwalletd6")
+  hl.exec_cmd("waybar & nm-applet & hyprpaper & dunst")
   hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
+  hl.exec_cmd("nextcloud")
+  hl.exec_cmd("keepassxc")
+  hl.exec_cmd("fcitx5 -d")
+  hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
 
@@ -111,8 +119,8 @@ hl.config({
         rounding_power = 2,
 
         -- Change transparency of focused and unfocused windows
-        active_opacity   = 1.0,
-        inactive_opacity = 0.9,
+        active_opacity   = 1,
+        inactive_opacity = 1,
 
         shadow = {
             enabled      = true,
@@ -184,7 +192,7 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 hl.config({
     dwindle = {
         preserve_split = true, -- You probably want this
-	force_split = 2
+        force_split = 2 -- force the new widows to be right or bottom on the split
     },
 })
 
@@ -205,7 +213,7 @@ hl.config({
 ----------------
 ----  MISC  ----
 ----------------
-
+-- !!! the text is deactivated directly in hyprpaper
 hl.config({
     misc = {
         force_default_wallpaper = 0,    -- Set to 0 or 1 to disable the anime mascot wallpapers
@@ -221,7 +229,7 @@ hl.config({
 hl.config({
     input = {
         kb_layout  = "us",
-        kb_variant = "",
+        kb_variant = "intl",
         kb_model   = "",
         kb_options = "",
         kb_rules   = "",
@@ -236,18 +244,18 @@ hl.config({
     },
 })
 
-hl.gesture({
-    fingers = 3,
-    direction = "horizontal",
-    action = "workspace"
-})
+-- hl.gesture({
+--     fingers = 3,
+--     direction = "horizontal",
+--     action = "workspace"
+-- })
 
 -- Example per-device config
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
-hl.device({
-    name        = "epic-mouse-v1",
-    sensitivity = -0.5,
-})
+-- hl.device({
+--     name        = "epic-mouse-v1",
+--     sensitivity = -0.5,
+-- })
 
 
 ---------------------
@@ -270,10 +278,11 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
 
 -- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + H",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + K",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
@@ -317,7 +326,14 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 -- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
--- Example window rules that are useful
+-- Set the workspace 1 in center (dp5), 2 left (dp4) and 3 right (dp6)
+hl.config({
+    workspace = {
+        "1, monitor:DP-5",
+        "2, monitor:DP-4",
+        "3, monitor:DP-6",
+    },
+})
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
