@@ -13,6 +13,8 @@
     // "tray",
     // "custom/separator7",
     "custom/updates",
+    "custom/separator3",
+    "custom/docker",
     "custom/separator2",
     "custom/separator5",
     "mpris",
@@ -43,7 +45,7 @@
     "custom/separator3",
     "cpu",
     "custom/separator2",
-    "tray" 
+    "tray"
   ],
 
   "hyprland/workspaces": {
@@ -105,23 +107,23 @@
     "return-type": "json",
     "interval": 2
   },
-"custom/updates": {
+  "custom/updates": {
     "format": "{}",
     "return-type": "json",
     "exec": "~/.config/waybar/scripts/updates.sh",
     "interval": 1800,
     "tooltip": true,
-    "on-click": "ghostty -e yay -Syu"
-},
+    "on-click": "ghostty -e yay"
+  },
 
-  // "custom/updates": {
-  //  "format": "󰏖 {}",
-  //  "exec": "bash -c 'pacman=$(checkupdates 2>/dev/null | wc -l); aur=$(yay -Qua 2>/dev/null | wc -l); echo \"$pacman/$aur\"'",
-  //  "interval": 1800,
-  //  "tooltip": true,
-  //  "tooltip-format": "Pacman: {text}\nAUR: {text}",
-  //  "on-click": "ghostty -e yay"
-  // },
+  "custom/docker": {
+    "format": "󰡨 {}",
+    "exec": "systemctl is-active --quiet docker && echo \"$(docker ps -q | wc -l)/$(docker ps -aq | wc -l)\" || echo nr",
+    "interval": 5,
+    "tooltip": true,
+    "tooltip-format": "Docker: {}",
+    "on-click": "systemctl is-active --quiet docker && (pkexec systemctl stop docker.service && pkexec systemctl stop docker.socket) || pkexec systemctl start docker; pkill -RTMIN+8 waybar"
+  },
 
   "tray": {
     "icon-size": 14,

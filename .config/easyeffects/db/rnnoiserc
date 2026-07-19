@@ -1,0 +1,5 @@
+[sie][RNNoise#0]
+bypass=true
+
+[sie][RNNoise#1]
+enableVad=true

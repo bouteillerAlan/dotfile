@@ -47,6 +47,7 @@ local menu        = "rofi -show drun"
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function ()
+  hl.exec_cmd("hyprctl dispatch focusmonitor DP-5") -- focus the center screen
   hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
   hl.exec_cmd("kwalletd6")
   hl.exec_cmd("waybar & nm-applet & hyprpaper & dunst")
@@ -54,6 +55,7 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("nextcloud")
   hl.exec_cmd("keepassxc")
   hl.exec_cmd("fcitx5 -d")
+  hl.exec_cmd("easyeffects -w")
   hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
@@ -327,13 +329,9 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
 -- Set the workspace 1 in center (dp5), 2 left (dp4) and 3 right (dp6)
-hl.config({
-    workspace = {
-        "1, monitor:DP-5",
-        "2, monitor:DP-4",
-        "3, monitor:DP-6",
-    },
-})
+hl.workspace_rule({ workspace = "2", monitor = "DP-5" })
+hl.workspace_rule({ workspace = "1", monitor = "DP-4" })
+hl.workspace_rule({ workspace = "3", monitor = "DP-6" })
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
