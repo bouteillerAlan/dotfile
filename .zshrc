@@ -15,10 +15,14 @@ source $ZSH/oh-my-zsh.sh
 export EDITOR="$(which nvim)"
 export VISUAL="$EDITOR"
 
+alias :q="exit"
 alias nv="nvim"
 alias ls="eza -la --icons=always --git"
 alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- for grep, tldr -- for man, glances or bpytop -- for ressource monitor, gping -- for ping, screenfetch -- for info, lolcat and figlet -- for fun' | lolcat"
 alias batt="cat /sys/class/power_supply/BAT0/capacity"
+
+# allow term in ssh to get kitty profile
+# alias ssh="kitten ssh"
 
 # source the env for rust
 #. "$HOME/.cargo/env"
@@ -34,13 +38,20 @@ export PATH="$PATH:$HOME/go/bin"
 export GPG_TTY=$(tty)
 
 export ANDROID_HOME="$HOME/Android/Sdk"
+# for emulator
+export PATH="$PATH:$HOME/Android/Sdk/emulator/"
+# for adb
+export PATH="$PATH:$HOME/Android/Sdk/platform-tools/"
+
+
 #export PATH="$HOME/.symfony5/bin:$PATH"
 
 # force editor for sudo user
 export SUDO_EDITOR="nvim"
 
-# set starship
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
+eval "$(/home/a2n/.local/bin/oh-my-posh init zsh --config /home/a2n/.cache/oh-my-posh/themes/star.omp.json)"
+# eval "$(zellij setup --generate-auto-start zsh)"
 
 # ----------------------
 # PYTHON
@@ -54,7 +65,6 @@ eval "$(starship init zsh)"
 #export PATH="$HOME/.local/bin:$PATH"
 # -----------------------
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
@@ -90,3 +100,4 @@ export PATH="$PATH:$HOME/.config/emacs/bin"
 
 # opencode
 export PATH=/home/a2n/.opencode/bin:$PATH
+
