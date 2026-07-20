@@ -1,0 +1,306 @@
+{
+  "exclusive": true,
+  "reload_style_on_change": true,
+  "position": "top",
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "spacing": 0,
+  "height": 0,
+
+  "modules-left": [
+    "hyprland/workspaces",
+    "custom/separator",
+    // "tray",
+    // "custom/separator7",
+    "custom/updates",
+    "custom/separator3",
+    "custom/docker",
+    "custom/separator2",
+    "custom/separator5",
+    "mpris",
+    "custom/separator6"
+  ],
+
+  "modules-center": [
+    "custom/separator",
+    "clock",
+    "custom/separator2"
+  ],
+
+  "modules-right": [
+    "custom/separator",
+    "bluetooth",
+    "custom/separator3",
+    "backlight",
+    "custom/separator4",
+    "battery",
+    "custom/separator4",
+    "power-profiles-daemon",
+    "custom/separator3",
+    "network",
+    "custom/separator3",
+    "pulseaudio",
+    "custom/separator3",
+    "memory",
+    "custom/separator3",
+    "cpu",
+    "custom/separator2",
+    "tray"
+  ],
+
+  "hyprland/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "cursor": true,
+    "format": "{icon}",
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": []
+    }
+  },
+
+  "custom/separator": {
+    "format": "[",
+    "tooltip": false
+  },
+
+  "custom/separator2": {
+    "format": "]",
+    "tooltip": false
+  },
+
+  "custom/separator3": {
+    "format": "󰿟",
+    "tooltip": false
+  },
+
+  "custom/separator4": {
+    "exec": "sh -c '[ -d /sys/class/backlight ] && [ \"$(ls -A /sys/class/backlight 2>/dev/null)\" ] && ls /sys/class/power_supply 2>/dev/null | grep -q \"^BAT\" && echo \"󰿟\"'",
+    "tooltip": false,
+    "interval": "once"
+  },
+
+  "custom/separator5": {
+    "exec": "sh -c 'playerctl status 2>/dev/null | grep -qE \"Playing|Paused\" && echo \"{\\\"text\\\":\\\"[\\\",\\\"class\\\":\\\"show\\\"}\" || echo \"{\\\"text\\\":\\\"\\\",\\\"class\\\":\\\"hide\\\"}\"'",
+    "return-type": "json",
+    "interval": 2,
+    "format": "{}"
+  },
+
+  "custom/separator6": {
+    "exec": "sh -c 'playerctl status 2>/dev/null | grep -qE \"Playing|Paused\" && echo \"{\\\"text\\\":\\\"]\\\",\\\"class\\\":\\\"show\\\"}\" || echo \"{\\\"text\\\":\\\"\\\",\\\"class\\\":\\\"hide\\\"}\"'",
+    "return-type": "json",
+    "interval": 2,
+    "format": "{}"
+  },
+
+  "custom/separator7": {
+    "exec": "sh -c 'count=$(busctl --user get-property org.kde.StatusNotifierWatcher /StatusNotifierWatcher org.kde.StatusNotifierWatcher RegisteredStatusNotifierItems | sed -n \"s/^as \\([0-9]\\+\\).*/\\1/p\"); [ \"${count:-0}\" -gt 0 ] && echo \"{\\\"text\\\":\\\"󰿟\\\"}\" || echo \"{\\\"text\\\":\\\"\\\"}\"'",
+    "return-type": "json",
+    "interval": 2
+  },
+  "custom/updates": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.config/waybar/scripts/updates.sh",
+    "interval": 1800,
+    "tooltip": true,
+    "on-click": "ghostty -e yay"
+  },
+
+  "custom/docker": {
+    "format": "󰡨 {}",
+    "exec": "systemctl is-active --quiet docker && echo \"$(docker ps -q | wc -l)/$(docker ps -aq | wc -l)\" || echo nr",
+    "interval": 5,
+    "tooltip": true,
+    "tooltip-format": "Docker: {}",
+    "on-click": "systemctl is-active --quiet docker && (pkexec systemctl stop docker.service && pkexec systemctl stop docker.socket) || pkexec systemctl start docker; pkill -RTMIN+8 waybar"
+  },
+
+  "tray": {
+    "icon-size": 14,
+    "spacing": 4
+  },
+
+  "clock": {
+    "format": "{:%H:%M • %d/%m/%Y}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+  "cpu": {
+    "interval": 2,
+    "format": " {usage:02}%",
+    "on-click": "ghostty -e btop",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
+  },
+
+  "memory": {
+    "interval": 2,
+    "format": " {percentage:02}%",
+    "on-click": "ghostty -e btop",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
+  },
+
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "󰱌 {percent}%",
+    "tooltip-format": "🌕 {percent}%",
+    "format-icons": [
+      "󰃜",
+      "󰃝",
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ]
+  },
+
+  "network": {
+    "format-icons": [
+      "󰤯",
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    "format": "{icon}",
+    "format-wifi": "󰖩 <span style='italic' weight='900' color='#df6124'>{signalStrength}%</span>",
+    "format-ethernet": "󰈀 <span style='italic' weight='900' color='#df6124'>{ipaddr}</span>",
+    "format-disconnected": "󰌙 <span style='italic' weight='900' color='#df6124'>off</span>",
+    "tooltip-format-wifi": "{essid}\n⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "ghostty -e nmtui"
+  },
+
+  "battery": {
+    "format": "󱟢 {capacity}%",
+    "format-discharging": "󱟞 {capacity}%",
+    "format-charging": "󰂄 {capacity}% ",
+    "format-plugged": "󱠴 {capacity}% ",
+    "format-full": "󱟢 {capacity}%",
+    "tooltip-format": "{capacity}%",
+
+    "format-icons": {
+      "charging": [
+        "󰢜",
+        "󰂆",
+        "󰂇",
+        "󰂈",
+        "󰢝",
+        "󰂉",
+        "󰢞",
+        "󰂊",
+        "󰂋",
+        "󰂅"
+      ],
+      "default": [
+        "󰁺",
+        "󰁻",
+        "󰁼",
+        "󰁽",
+        "󰁾",
+        "󰁿",
+        "󰂀",
+        "󰂁",
+        "󰂂",
+        "󰁹"
+      ]
+    },
+
+    "interval": 5,
+
+    "states": {
+      "warning": 20,
+      "critical": 10
+    },
+
+    "on-click": "notify-send \"Battery\" \"$(upower -i $(upower -e | grep BAT) | grep -E 'state|percentage|time to' | sed 's/^ *//')\""
+  },
+
+  "bluetooth": {
+    "justify": "center",
+    "format": "bt <span style='italic' weight='900' color='#df6124'>{status}</span> {num_connections}",
+    "format-disabled": "bt off",
+    "format-connected": "bt <span style='italic' weight='900' color='#df6124'>{status}</span> {num_connections}",
+    "tooltip-format": "Connected devices: {num_connections}",
+    "on-click": "blueman-manager"
+  },
+
+  "pulseaudio": {
+    "justify": "center",
+    "format": "vol {volume}%",
+    "format-muted": "vol <span style='italic' weight='900' color='#df6124'>muted</span>",
+    "tooltip-format": "{volume}%",
+
+    "scroll-step": 5,
+
+    "on-click": "pavucontrol",
+    "on-click-right": "pamixer -t",
+
+    "format-icons": {
+      "headphone": "",
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    },
+
+    "states": {
+      "warning": 50,
+      "critical": 100
+    }
+  },
+
+  "power-profiles-daemon": {
+    "justify": "center",
+    "format": "{icon}",
+    "tooltip-format": "{profile}",
+
+    "format-icons": {
+      "performance": "perf",
+      "balanced": "bal",
+      "power-saver": "eco"
+    }
+  },
+
+  "mpris": {
+    "format": " {dynamic}",
+    "format-paused": "<span color='grey'>{status_icon} {dynamic}</span>",
+    "title-len": 30,
+    "dynamic-order": [
+      "artist",
+      "title"
+    ],
+    "tooltip-format": "{player}\n{artist} - {title}",
+    "status-icons": {
+      "paused": "󰝛"
+    }
+  }
+
+}
