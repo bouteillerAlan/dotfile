@@ -267,11 +267,30 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
-    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+-- for i = 1, 10 do
+--     local key = i % 10 -- 10 maps to key 0
+--     hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
+--     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+-- end
+
+local workspaces = {
+  [1] = "name:srf",
+  [2] = "name:dev",
+  [3] = "name:stg",
+  [4] = "name:cht",
+  [5] = "name:sde",
+}
+
+for id, name in pairs(workspaces) do
+    hl.workspace_rule({
+      workspace = id,
+      persistent = true,
+      default_name = name,
+    })
+    hl.bind(mainMod .. " + " .. id, hl.dsp.focus({ workspace = name }))
+    hl.bind(mainMod .. " + SHIFT + " .. id, hl.dsp.window.move({ workspace = name }))
 end
+
 
 -- Example special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
@@ -309,6 +328,7 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 
 -- Set the workspace 1 in center (dp5), 2 left (dp4) and 3 right (dp6)
 -- hl.workspace_rule({ workspace = "2", monitor = "DP-5" })
+
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
