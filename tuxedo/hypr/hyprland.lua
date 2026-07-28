@@ -1,3 +1,6 @@
+-- sddm hyprland hyprlock hypridle hyprpaper hyprpicker
+-- hyprshot hyprsnap xdg-desktop-portal-hyprland
+
 ------------------
 ---- MONITORS ----
 ------------------
@@ -19,6 +22,7 @@ hl.monitor({
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "rofi -show drun"
+local winmenu     = "rofi -show window"
 
 -------------------
 ---- AUTOSTART ----
@@ -38,6 +42,7 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("keepassxc")
   hl.exec_cmd("fcitx5 -d")
   hl.exec_cmd("easyeffects -w")
+  hl.exec_cmd("hypridle")
   hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
@@ -245,6 +250,8 @@ hl.config({
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
@@ -252,16 +259,17 @@ local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(winmenu))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
 
 -- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + H",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + K",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
@@ -274,11 +282,11 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 -- end
 
 local workspaces = {
-  [1] = "name:srf",
-  [2] = "name:dev",
-  [3] = "name:stg",
-  [4] = "name:cht",
-  [5] = "name:sde",
+  [1] = "name:srf", -- surf
+  [2] = "name:dev", -- dev
+  [3] = "name:stg", -- setting
+  [4] = "name:cht", -- chat
+  [5] = "name:sde", -- side
 }
 
 for id, name in pairs(workspaces) do
