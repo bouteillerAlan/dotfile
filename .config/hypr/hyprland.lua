@@ -3,16 +3,21 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+
+local outR = "DP-6" -- serial: T4LMQS092416
+local outL = "DP-4" -- serial: RBLMHK000532
+local outC = "DP-5" -- serial: T4LMQS092529
+
 -- center
 hl.monitor({
-    output   = "DP-5",
+    output   = outC,
     mode     = "2560x1440@240",
     position = "0x0",
     scale    = 1,
 })
 -- droite
 hl.monitor({
-    output   = "DP-6",
+    output   = outR,
     mode     = "2560x1440@240",
     position = "2560x0",
     scale    = 1,
@@ -20,7 +25,7 @@ hl.monitor({
 })
 -- proart, gauche
 hl.monitor({
-    output   = "DP-4",
+    output   = outL,
     mode     = "2560x1440@59.95",
     position = "-2560x0",
     scale    = 1,
@@ -35,7 +40,8 @@ hl.monitor({
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "rofi -show drun"
-
+local winmenu     = "rofi -show window"
+local calc        = "rofi -show calc -modi calc -no-show-match -no-sort"
 
 -------------------
 ---- AUTOSTART ----
@@ -48,6 +54,7 @@ local menu        = "rofi -show drun"
 --
 hl.on("hyprland.start", function ()
   hl.exec_cmd("hyprctl dispatch focusmonitor DP-5") -- focus the center screen
+  hl.exec_cmd("hyprctl dispatch workspace 1")       -- start on workspace srf (center)
   hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
   hl.exec_cmd("kwalletd6")
   hl.exec_cmd("waybar & nm-applet & hyprpaper & dunst")
@@ -56,6 +63,7 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("keepassxc")
   hl.exec_cmd("fcitx5 -d")
   hl.exec_cmd("easyeffects -w")
+  hl.exec_cmd("hypridle")
   hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
@@ -152,7 +160,7 @@ hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
 
 -- Default springs
-hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
+hl.curve("easy",           { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
 
 hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
 hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
@@ -259,6 +267,16 @@ hl.config({
 --     sensitivity = -0.5,
 -- })
 
+-- ProArt PA169CDV (left monitor, DP-4): bind touch/pen to correct output
+hl.device({
+    name   = "tablet-isd-v4-stylus",   -- pen/stylus
+    output = outL,
+})
+hl.device({
+    name   = "tablet-isd-v4",          -- finger touch
+    output = outL,
+})
+
 
 ---------------------
 ---- KEYBINDINGS ----
@@ -274,6 +292,8 @@ hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(winmenu))
+hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(calc))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
@@ -288,10 +308,28 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
-    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+-- for i = 1, 10 do
+--     local key = i % 10 -- 10 maps to key 0
+--     hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
+--     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+-- end
+
+local workspaces = {
+  [1] = "name:srf", -- surf
+  [2] = "name:dev", -- dev
+  [3] = "name:stg", -- setting
+  [4] = "name:cht", -- chat
+  [5] = "name:sde", -- side
+}
+
+for id, name in pairs(workspaces) do
+    hl.workspace_rule({
+      workspace = id,
+      persistent = true,
+      default_name = name,
+    })
+    hl.bind(mainMod .. " + " .. id, hl.dsp.focus({ workspace = id }))
+    hl.bind(mainMod .. " + SHIFT + " .. id, hl.dsp.window.move({ workspace = id }))
 end
 
 -- Example special workspace (scratchpad)
@@ -328,16 +366,17 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 -- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
--- Set the workspace 1 in center (dp5), 2 left (dp4) and 3 right (dp6)
-hl.workspace_rule({ workspace = "2", monitor = "DP-5" })
-hl.workspace_rule({ workspace = "1", monitor = "DP-4" })
-hl.workspace_rule({ workspace = "3", monitor = "DP-6" })
+-- workspace → monitor mapping
+hl.workspace_rule({ workspace = 1, monitor = outC })  -- srf → center
+hl.workspace_rule({ workspace = 2, monitor = outL })  -- dev  → left
+hl.workspace_rule({ workspace = 3, monitor = outR })  -- stg  → right
+hl.workspace_rule({ workspace = 4, monitor = outR })  -- cht  → right
+hl.workspace_rule({ workspace = 5, monitor = outR })  -- sde  → right
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",
     match = { class = ".*" },
-
     suppress_event = "maximize",
 })
 -- suppressMaximizeRule:set_enabled(false)
