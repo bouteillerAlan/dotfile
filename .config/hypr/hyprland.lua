@@ -53,8 +53,6 @@ local calc        = "rofi -show calc -modi calc -no-show-match -no-sort"
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function ()
-  hl.exec_cmd("hyprctl dispatch focusmonitor DP-5") -- focus the center screen
-  hl.exec_cmd("hyprctl dispatch workspace 1")       -- start on workspace srf (center)
   hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
   hl.exec_cmd("kwalletd6")
   hl.exec_cmd("waybar & nm-applet & hyprpaper & dunst")
@@ -64,6 +62,9 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("fcitx5 -d")
   hl.exec_cmd("easyeffects -w")
   hl.exec_cmd("hypridle")
+  hl.dispatch(hl.dsp.focus({ workspace = 1 }))
+  hl.exec_cmd("wl-paste --type text --watch cliphist store")
+  hl.exec_cmd("wl-paste --type image --watch cliphist store")
   hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
@@ -298,7 +299,8 @@ hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
-
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p 'Yank!' | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("rofi -modi emoji -show emoji"))
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + H",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
@@ -396,6 +398,15 @@ hl.window_rule({
     no_focus = true,
 })
 
+-- force steam game to be fullscreen
+-- hl.window_rule({
+--     name = "steam-games-fullscreen",
+--     match = {
+--         class = "^steam_app_.*$",
+--     },
+--     fullscreen = true,
+-- })
+
 -- Layer rules also return a handle.
 -- local overlayLayerRule = hl.layer_rule({
 --     name  = "no-anim-overlay",
@@ -410,5 +421,12 @@ hl.window_rule({
     match = { class = "hyprland-run" },
 
     move  = "20 monitor_h-120",
+    float = true,
+})
+
+-- Force Android Emulator windows to float
+hl.window_rule({
+    name  = "android-emulator-float",
+    match = { class = "Emulator" },
     float = true,
 })
