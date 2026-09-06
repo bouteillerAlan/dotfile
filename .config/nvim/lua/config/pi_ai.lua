@@ -77,6 +77,28 @@ local function notify_usage(prefix, level)
   notify(prefix .. " — " .. format_usage(), level or vim.log.levels.INFO)
 end
 
+local function usage_has_tokens(usage)
+  return type(usage) == "table"
+    and ((usage.input or 0) > 0
+      or (usage.output or 0) > 0
+      or (usage.cacheRead or 0) > 0
+      or (usage.cacheWrite or 0) > 0
+      or (usage.totalTokens or 0) > 0)
+end
+
+local function update_usage(usage)
+  if type(usage) ~= "table" then
+    return
+  end
+
+  -- Some providers/RPC streams emit zero usage during streaming and only put
+  -- the authoritative accounting on message_end/turn_end.message. Keep the
+  -- last non-zero usage so the final notification is not "0 0 0".
+  if not current_usage or usage_has_tokens(usage) or not usage_has_tokens(current_usage) then
+    current_usage = usage
+  end
+end
+
 local function project_root_for_file(filename)
   -- Use the Git root to avoid leaking context between projects.
   local dir = filename ~= "" and vim.fn.fnamemodify(filename, ":p:h") or vim.fn.getcwd()
@@ -221,15 +243,16 @@ local function handle_rpc_line(line)
     return
   end
 
-  if event.usage then
-    current_usage = event.usage
-  end
+  update_usage(event.usage)
+  update_usage(event.message and event.message.usage)
 
   if event.type == "message_update" then
     local delta = event.assistantMessageEvent
     if delta and delta.type == "text_delta" then
       table.insert(pi_output, delta.delta)
     end
+  elseif event.type == "message_end" or event.type == "turn_end" then
+    update_usage(event.message and event.message.usage)
   elseif event.type == "agent_settled" then
     vim.schedule(finish_generation)
   elseif event.type == "response" and event.success == false then
@@ -439,7 +462,18 @@ function M.setup()
   end, { desc = "pi SuperAi: rewrite selection" })
 
   vim.keymap.set("n", "<leader>pi", function()
-    vim.cmd("'<,'>SuperAi")
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+
+    if start_pos[2] == 0 or end_pos[2] == 0 then
+      notify("pi: aucune sélection visuelle précédente", vim.log.levels.WARN)
+      return
+    end
+
+    M.super_ai({
+      line1 = math.min(start_pos[2], end_pos[2]),
+      line2 = math.max(start_pos[2], end_pos[2]),
+    })
   end, { desc = "pi SuperAi: rewrite last visual selection" })
 
   vim.keymap.set("n", "<esc>", M.abort_or_nohlsearch, { desc = "pi abort or clear search highlight" })
