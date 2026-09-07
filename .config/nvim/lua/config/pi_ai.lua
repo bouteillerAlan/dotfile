@@ -821,19 +821,13 @@ function M.setup()
   end, { desc = "pi SuperAi: rewrite selection" })
 
   vim.keymap.set("n", "<leader>pi", function()
-    local start_pos = vim.fn.getpos("'<")
-    local end_pos = vim.fn.getpos("'>")
-
-    if start_pos[2] == 0 or end_pos[2] == 0 then
-      notify("pi: no previous visual selection", vim.log.levels.WARN)
-      return
-    end
+    local target_line = vim.fn.line(".")
 
     M.super_ai({
-      line1 = math.min(start_pos[2], end_pos[2]),
-      line2 = math.max(start_pos[2], end_pos[2]),
+      line1 = target_line,
+      line2 = target_line,
     })
-  end, { desc = "pi SuperAi: rewrite last visual selection" })
+  end, { desc = "pi SuperAi: rewrite the current line" })
 
   vim.keymap.set("n", "<esc>", M.abort_or_nohlsearch, { desc = "pi abort or clear search highlight" })
 end
