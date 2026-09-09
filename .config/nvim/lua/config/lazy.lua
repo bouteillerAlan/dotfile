@@ -104,47 +104,10 @@ require("lazy").setup({
       "nvim-lualine/lualine.nvim",
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
-        -- telescope-style path shortening
-        local function shorten_path(path, keep)
-          keep = keep or 3
-          local prefix = ""
-          if path:sub(1, 1) == "/" then
-            prefix = "/"
-            path = path:sub(2)
-          end
-          local parts = vim.split(path, "/", { plain = true })
-          local n = #parts
-          if n > keep then
-            for i = 1, n - keep do
-              if parts[i] ~= "" and parts[i] ~= "~" and parts[i] ~= ".." then
-                parts[i] = parts[i]:sub(1, 1)
-              end
-            end
-          end
-          return prefix .. table.concat(parts, "/")
-        end
-
-        local function shortened_filepath()
-          local bufname = vim.api.nvim_buf_get_name(0)
-          if bufname == "" then
-            return "[No Name]"
-          end
-          -- ":p" -> always the full absolute path, like `pwd`
-          local path = vim.fn.fnamemodify(bufname, ":p")
-          local result = shorten_path(path, 3)
-          if vim.bo.modified then
-            result = result .. " [+]"
-          end
-          if vim.bo.readonly then
-            result = result .. " [RO]"
-          end
-          return result
-        end
-
         require("lualine").setup({
           sections = {
             lualine_c = {
-              shortened_filepath,
+              "filename",
               function()
                 return require("compress_size").status()
               end,
@@ -181,7 +144,6 @@ require("lazy").setup({
           "sql",
           "lua",
           "json",
-          "prisma",
           "markdown",
           "markdown_inline",
           "python",
@@ -614,6 +576,15 @@ require("lazy").setup({
         vim.diagnostic.config({ virtual_text = false }) -- Disable Neovim's default virtual text diagnostics
       end,
     },
+    {
+      "stevearc/overseer.nvim",
+      ---@module 'overseer'
+      ---@type overseer.SetupOpts
+      opts = {templates = { "builtin" }},
+      config = function ()
+        require("overseer").setup()
+      end
+    }
     -- {
     --   'MeanderingProgrammer/render-markdown.nvim',
     --   dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.nvim' },
@@ -644,9 +615,6 @@ vim.keymap.set("n", "<Leader>fr", "<cmd>lua require('telescope').extensions.rece
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
-
--- cloak
-vim.keymap.set("n", "<leader>hh", "<cmd>CloakToggle<cr>", { desc = "Toggle cloak" })
 
 -- pi SuperAi integration (`:SuperAi`, visual `<leader>pi`, Esc aborts pi or clears search highlight)
 require("config.pi_ai").setup()
@@ -846,10 +814,6 @@ vim.lsp.config("ts_ls", {
     javascript = { inlayHints = ts_inlay_hints },
   }
 })
-vim.lsp.config("prismals", {
-  capabilities = capabilities,
-  filetypes = { "prisma" },
-})
 vim.lsp.config("gopls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
@@ -911,7 +875,6 @@ vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 vim.lsp.enable("clangd")
 vim.lsp.enable("tailwindcss") -- npm i -g @tailwindcss/language-server
-vim.lsp.enable("prismals") -- npm install -g @prisma/language-server
 
 -- treesitter special config --
 -- use bash parser for zsh files (no dedicated zsh parser)
@@ -932,33 +895,11 @@ vim.api.nvim_create_autocmd('FileType', {
   end
 })
 
--- Treesitter's own indentexpr has no special case for `/** */` continuation
--- lines though (it doesn't do "align `*` under the second char of `/**`"),
--- so JSDoc bodies still come out wrong on their own. Special-case those
--- lines here, defer to treesitter for everything else.
-function _G.__js_ts_indent()
-  local lnum = vim.v.lnum
-  local line = vim.fn.getline(lnum)
-  local prevlnum = vim.fn.prevnonblank(lnum - 1)
-  local prevline = vim.fn.getline(prevlnum)
-
-  if line:match('^%s*%*') then
-    if prevline:match('^%s*/%*') then
-      -- previous line opened the comment (`/**`): align one column past it
-      return vim.fn.indent(prevlnum) + 1
-    elseif prevline:match('^%s*%*') then
-      -- previous line was itself a `*` continuation: match it exactly
-      return vim.fn.indent(prevlnum)
-    end
-  end
-
-  return require('nvim-treesitter').indentexpr()
-end
-
+-- treesitter indent for JSX/TSX (fixes = re-indent and Enter auto-indent)
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'typescriptreact', 'javascriptreact', 'typescript', 'javascript' },
+  pattern = { 'typescriptreact', 'javascriptreact' },
   callback = function()
-    vim.bo.indentexpr = "v:lua.__js_ts_indent()"
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end
 })
 
@@ -1043,3 +984,55 @@ vim.keymap.set({"n"}, "<leader>tt", toggle_terminal, { desc = "Toggle a floating
 -- exit terminal mode
 vim.keymap.set({"t"}, "<leader><esc>", "<c-\\><c-n>")
 
+
+
+-- overseer custom action for bash
+local overseer = require("overseer")
+
+overseer.register_template({
+  name = "watch script",
+  params = {
+    script = { type = "string" },
+  },
+  builder = function(params)
+    local script = vim.fn.getcwd() .. "/" .. params.script
+
+    return {
+      name = "watch: " .. params.script,
+      cmd = "watchexec",
+      args = { "-c", "-r", "-w", vim.fn.getcwd(), "--", script },
+      components = { "default" },
+    }
+  end,
+})
+
+local function ensure_watch_task()
+  vim.ui.input({ prompt = "Script to watch: ", default = "./" }, function(input)
+    if not input or input == "" then
+      return
+    end
+
+    local script_name = input:gsub("^%./", "")
+
+    local task_name = "watch: " .. script_name
+
+    local tasks = overseer.list_tasks({ name = task_name })
+    if #tasks > 0 then
+      overseer.run_action(tasks[1], "open vsplit")
+      vim.cmd("wincmd h")
+      return
+    end
+
+    overseer.run_template(
+      { name = "watch script", params = { script = script_name } },
+      function(task)
+        if task then
+          overseer.run_action(task, "open vsplit")
+          vim.cmd("wincmd h")
+        end
+      end
+    )
+  end)
+end
+
+vim.keymap.set("n", "<leader>rw", ensure_watch_task, { desc = "Start/focus watch script (prompt)" })
