@@ -1,0 +1,12 @@
+{
+  "bash strict boilerplate": {
+    "prefix": "bash",
+    "body": [
+      "#!/usr/bin/env bash",
+      "set -euo pipefail",
+      "",
+      "\"\\$@\"$0"
+    ],
+    "description": "Bash script shebang + strict mode + arg passthrough"
+  }
+}
