@@ -822,6 +822,10 @@ vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle)
 -- custom one
 vim.keymap.set('n', '<C-z>', '<cmd>undo<cr>', {desc = 'undo one change'})
 
+-- overseer
+vim.keymap.set('n', '<leader>ot', vim.cmd.OverseerToggle, {desc = 'overseer toogle'})
+vim.keymap.set('n', '<leader>or', vim.cmd.OverseerRun, {desc = 'overseer run'})
+
 ---                  ---
 -- LSP & other config --
 ---                  ---
