@@ -73,18 +73,54 @@ vim.opt.undofile = true -- keep the history of undo
 vim.opt.ignorecase = true -- in searching
 vim.opt.scrolloff = 20
 
+-- ---------------------------------------------------------------------
+-- LSP loading progress (indexing, workspace init, etc) is shown by
+-- fidget.nvim as floating corner notifications -- see the plugin spec
+-- below, it hooks $/progress itself, no wiring needed here.
+--
+-- nvim-treesitter's parser install has no $/progress-style API though,
+-- so this manually reports it into fidget's UI as its own entry: a
+-- handle is opened right before `install{}` runs (in the treesitter
+-- plugin's config below) and closed here when treesitter fires its
+-- (coarse -- just a completion ping, no real percentage) `User TSUpdate`
+-- event.
+-- ---------------------------------------------------------------------
+local ts_progress_handle = nil
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "TSUpdate",
+  desc = "Report treesitter parser (re)install completion to fidget.nvim",
+  callback = function()
+    if ts_progress_handle then
+      ts_progress_handle:finish()
+      ts_progress_handle = nil
+    end
+  end,
+})
+
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
     {
-      "folke/tokyonight.nvim",
+      "uhs-robert/oasis.nvim",
       lazy = false,
       priority = 1000,
-      opts = {},
       config = function()
-        vim.cmd("colorscheme tokyonight-night")
+        require("oasis").setup({
+          style = "moonlight",
+        })
+        vim.cmd.colorscheme("oasis")
       end
     },
+    -- {
+    --   "folke/tokyonight.nvim",
+    --   lazy = false,
+    --   priority = 1000,
+    --   opts = {},
+    --   config = function()
+    --     vim.cmd("colorscheme tokyonight-night")
+    --   end
+    -- },
     {
       "laytan/cloak.nvim",
       config = function ()
@@ -104,10 +140,49 @@ require("lazy").setup({
       "nvim-lualine/lualine.nvim",
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
+        -- telescope-style path shortening
+        local function shorten_path(path, keep)
+          keep = keep or 3
+          local prefix = ""
+          if path:sub(1, 1) == "/" then
+            prefix = "/"
+            path = path:sub(2)
+          end
+          local parts = vim.split(path, "/", { plain = true })
+          local n = #parts
+          if n > keep then
+            for i = 1, n - keep do
+              if parts[i] ~= "" and parts[i] ~= "~" and parts[i] ~= ".." then
+                parts[i] = parts[i]:sub(1, 1)
+              end
+            end
+          end
+          return prefix .. table.concat(parts, "/")
+        end
+
+        local function shortened_filepath()
+          local bufname = vim.api.nvim_buf_get_name(0)
+          if bufname == "" then
+            return "[No Name]"
+          end
+          -- ":p" -> always the full absolute path, like `pwd`
+          local path = vim.fn.fnamemodify(bufname, ":p")
+          local result = shorten_path(path, 3)
+          if vim.bo.modified then
+            result = result .. " [+]"
+          end
+          if vim.bo.readonly then
+            result = result .. " [RO]"
+          end
+          return result
+        end
+
+        -- LSP/treesitter loading progress is shown by fidget.nvim (see its
+        -- plugin spec below) as floating notifications, not in here.
         require("lualine").setup({
           sections = {
             lualine_c = {
-              "filename",
+              shortened_filepath,
               function()
                 return require("compress_size").status()
               end,
@@ -126,11 +201,25 @@ require("lazy").setup({
       end
     },
     {
+      "j-hui/fidget.nvim",
+      -- lazy=false + high priority: loaded before treesitter's config
+      -- below, which needs fidget.progress.handle already on the
+      -- runtimepath to report its own install progress into it
+      lazy = false,
+      priority = 1000,
+      opts = {},
+    },
+    {
       "nvim-treesitter/nvim-treesitter",
       lazy = false,
       branch = "main",
       build = ":TSUpdate",
       config = function()
+        ts_progress_handle = require("fidget.progress.handle").create({
+          title = "installing/checking parsers",
+          message = "running...",
+          lsp_client = { name = "treesitter" },
+        })
         require"nvim-treesitter".install {
           "bash",
           "rust",
@@ -144,6 +233,7 @@ require("lazy").setup({
           "sql",
           "lua",
           "json",
+          "prisma",
           "markdown",
           "markdown_inline",
           "python",
@@ -532,6 +622,59 @@ require("lazy").setup({
         local theta = require("alpha.themes.theta")
         local dashboard = require("alpha.themes.dashboard")
 
+        -- retro palette: red, orange, amber, brown
+        local retro_colors = { "#d70000", "#ff5f00", "#ffaf00", "#875f00" }
+        for i, hex in ipairs(retro_colors) do
+          vim.api.nvim_set_hl(0, "AlphaHeaderRetro" .. i, { fg = hex })
+        end
+
+        local n_colors = #retro_colors
+        local n_lines = #theta.header.val
+        local offset = 0
+
+        -- color each header line, cycling through the palette
+        local function apply_header_colors()
+          theta.header.opts.hl = {}
+          for i = 1, n_lines do
+            local group = "AlphaHeaderRetro" .. (((i - 1 + offset) % n_colors) + 1)
+            theta.header.opts.hl[i] = { { group, 0, -1 } }
+          end
+        end
+        apply_header_colors()
+
+        -- animate: flow the palette down the header, looping
+        local uv = vim.uv or vim.loop
+        local timer = nil
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "alpha",
+          callback = function(args)
+            if timer then return end
+            timer = uv.new_timer()
+            timer:start(0, 190, vim.schedule_wrap(function()
+              if not vim.api.nvim_buf_is_valid(args.buf) then
+                if timer then timer:stop(); timer:close(); timer = nil end
+                return
+              end
+              offset = (offset - 1) % n_colors
+              apply_header_colors()
+              if vim.api.nvim_get_current_buf() == args.buf then
+                alpha.redraw()
+              end
+            end))
+            vim.api.nvim_create_autocmd("BufUnload", {
+              buffer = args.buf,
+              once = true,
+              callback = function()
+                if timer then
+                  timer:stop()
+                  timer:close()
+                  timer = nil
+                end
+              end,
+            })
+          end,
+        })
+
         theta.buttons.val = {
           dashboard.button("e", "  New file", ":ene <BAR> startinsert<CR>"),
           dashboard.button("SPC f f", "  Find file", ":Telescope find_files<CR>"),
@@ -615,6 +758,9 @@ vim.keymap.set("n", "<Leader>fr", "<cmd>lua require('telescope').extensions.rece
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
+
+-- cloak
+vim.keymap.set("n", "<leader>hh", "<cmd>CloakToggle<cr>", { desc = "Toggle cloak" })
 
 -- pi SuperAi integration (`:SuperAi`, visual `<leader>pi`, Esc aborts pi or clears search highlight)
 require("config.pi_ai").setup()
@@ -814,6 +960,10 @@ vim.lsp.config("ts_ls", {
     javascript = { inlayHints = ts_inlay_hints },
   }
 })
+vim.lsp.config("prismals", {
+  capabilities = capabilities,
+  filetypes = { "prisma" },
+})
 vim.lsp.config("gopls", {capabilities = capabilities})
 vim.lsp.config("qmlls", {capabilities = capabilities, cmd = {"qmlls6"}})
 vim.lsp.config("bashls", {capabilities = capabilities})
@@ -875,6 +1025,7 @@ vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 vim.lsp.enable("clangd")
 vim.lsp.enable("tailwindcss") -- npm i -g @tailwindcss/language-server
+vim.lsp.enable("prismals") -- npm install -g @prisma/language-server
 
 -- treesitter special config --
 -- use bash parser for zsh files (no dedicated zsh parser)
@@ -895,11 +1046,33 @@ vim.api.nvim_create_autocmd('FileType', {
   end
 })
 
--- treesitter indent for JSX/TSX (fixes = re-indent and Enter auto-indent)
+-- Treesitter's own indentexpr has no special case for `/** */` continuation
+-- lines though (it doesn't do "align `*` under the second char of `/**`"),
+-- so JSDoc bodies still come out wrong on their own. Special-case those
+-- lines here, defer to treesitter for everything else.
+function _G.__js_ts_indent()
+  local lnum = vim.v.lnum
+  local line = vim.fn.getline(lnum)
+  local prevlnum = vim.fn.prevnonblank(lnum - 1)
+  local prevline = vim.fn.getline(prevlnum)
+
+  if line:match('^%s*%*') then
+    if prevline:match('^%s*/%*') then
+      -- previous line opened the comment (`/**`): align one column past it
+      return vim.fn.indent(prevlnum) + 1
+    elseif prevline:match('^%s*%*') then
+      -- previous line was itself a `*` continuation: match it exactly
+      return vim.fn.indent(prevlnum)
+    end
+  end
+
+  return require('nvim-treesitter').indentexpr()
+end
+
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'typescriptreact', 'javascriptreact' },
+  pattern = { 'typescriptreact', 'javascriptreact', 'typescript', 'javascript' },
   callback = function()
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    vim.bo.indentexpr = "v:lua.__js_ts_indent()"
   end
 })
 
