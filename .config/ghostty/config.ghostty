@@ -1,7 +1,8 @@
 # theme = Rose Pine
 # theme = iTerm2 Light Background
 # theme = Rose Pine Dawn
-theme = TokyoNight Night
+# theme = TokyoNight Night
+theme = "oasis_moonlight_dark"
 confirm-close-surface = false
 
 # ligature

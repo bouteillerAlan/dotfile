@@ -1,0 +1,35 @@
+# Oasis Moonlight_dark
+# Author: uhs-robert
+
+palette = 0=#0C0E13
+palette = 8=#4E6578
+
+palette = 1=#FF7979
+palette = 9=#FFA0A0
+
+palette = 2=#7FCF78
+palette = 10=#A3E39A
+
+palette = 3=#F0E68C
+palette = 11=#F8B471
+
+palette = 4=#81C0FF
+palette = 12=#87CEEB
+
+palette = 5=#C695FF
+palette = 13=#D2ADFF
+
+palette = 6=#69C3AA
+palette = 14=#8AD3BE
+
+palette = 7=#F5F5DC
+palette = 15=#FFFFF0
+
+foreground = #F5F5DC
+background = #0C0E13
+
+selection-background = #24364D
+selection-foreground = #F5F5DC
+
+cursor-color = #F0E68C
+cursor-text = #0C0E13
