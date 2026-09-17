@@ -34,8 +34,27 @@
             "fetch_version": true
           },
           "style": "plain",
-          "template": "<#ffffff>via</> \ue781 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} ",
+          "template": "<#ffffff>via</> \ue781 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ if .Full }}{{ .Full }}{{ else }}<#E06C75>nover</>{{ end }} ",
           "type": "node"
+        },
+        {
+          "foreground": "#98C379",
+          "options": {
+            "name": "typescript",
+            "extensions": ["*.ts", "*.tsx"],
+            "project_files": ["tsconfig.json"],
+            "tools": [
+              {
+                "name": "tsc",
+                "executable": "tsc",
+                "args": ["--version"],
+                "regex": "Version (?P<version>\\d+\\.\\d+\\.\\d+(?:[-+][\\w.]+)?)"
+              }
+            ]
+          },
+          "style": "plain",
+          "template": "/  {{ if .Full }}{{ .Full }}{{ else }}<#E06C75>nover</>{{ end }} ",
+          "type": "language"
         },
         {
           "foreground": "#98C379",
@@ -50,7 +69,7 @@
             "display_mode": "files",
             "extensions": ["yarn.lock"]
           },
-          "template": "/  {{ .Full }} ",
+          "template": "/  {{ if .Full }}{{ .Full }}{{ else }}<#E06C75>nover</>{{ end }} ",
           "type": "yarn"
         },
         {
@@ -60,7 +79,7 @@
             "display_mode": "files",
             "extensions": ["package-lock.json"]
           },
-          "template": "/  {{ .Full }} ",
+          "template": "/  {{ if .Full }}{{ .Full }}{{ else }}<#E06C75>nover</>{{ end }} ",
           "type": "npm"
         },
         {
@@ -70,7 +89,7 @@
             "display_mode": "files",
             "extensions": ["pnpm-lock.yaml"]
           },
-          "template": "/  {{ .Full }}",
+          "template": "/  {{ if .Full }}{{ .Full }}{{ else }}<#E06C75>nover</>{{ end }}",
           "type": "pnpm"
         },
         {
