@@ -58,6 +58,7 @@ vim.g.has_nerd_font = true
 vim.opt.hlsearch = true
 vim.opt.clipboard:append("unnamedplus")
 vim.opt.relativenumber = true
+vim.opt.number = true
 -- file indentation
 vim.g.python_recommended_style = 0
 vim.opt.tabstop = 2
@@ -101,6 +102,19 @@ vim.api.nvim_create_autocmd("User", {
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
+    {
+      "folke/flash.nvim",
+      event = "VeryLazy",
+      ---@type Flash.Config
+      opts = {},
+      keys = {
+        { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+        { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+        { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+        { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+        { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+      },
+    },
     {
       "uhs-robert/oasis.nvim",
       lazy = false,
@@ -473,7 +487,6 @@ require("lazy").setup({
         signature = { enabled = true, trigger = { enabled = true, show_on_keyword = true } },
         completion = {
           accept = {
-            -- auto add brackets/parens when accepting a function/method completion
             auto_brackets = { enabled = true },
           },
           menu = {
@@ -547,7 +560,11 @@ require("lazy").setup({
         focus = true,
         keys = {
           ["<esc>"] = "close",
-        }
+        },
+        modes = {
+          -- Trouble's right-hand symbols pane defaults to 30 columns.
+          symbols = { win = { size = 60 } },
+        },
       },
       cmd = "Trouble",
     },
@@ -754,6 +771,7 @@ vim.keymap.set("n", "<leader>fh", builtin.help_tags, {desc = "Telescope help tag
 vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", {desc = "Telescope todo list"})
 -- for recent file
 vim.keymap.set("n", "<Leader>fr", "<cmd>lua require('telescope').extensions.recent_files.pick()<CR>", {desc = "telescope recent file"})
+require("config.snipet_finder").setup()
 
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
@@ -775,6 +793,7 @@ vim.keymap.set("n", "<leader>dd", "<cmd>Trouble diagnostics toggle filter.buf=0<
 vim.keymap.set("n", "<leader>ts", "<cmd>Trouble symbols toggle focus=true<cr>", {desc = "Symbols (Trouble)"})
 vim.keymap.set("n", "<leader>tl", "<cmd>Trouble loclist toggle<cr>", {desc = "Location List (Trouble)"})
 vim.keymap.set("n", "<leader>tq", "<cmd>Trouble qflist toggle<cr>", {desc = "Quickfix List (Trouble)"})
+vim.keymap.set("n", "<leader>ti", "<cmd>InspectTree<cr>", { desc = "Tree-sitter inspect tree" })
 
 -- rename
 -- this one show the old value in the prompt, useful to edit it for example
@@ -789,6 +808,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
     -- goto def is <C-]> that I prefer because we can use <C-t> to go back
     -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
+    vim.keymap.set("n", "K", function()
+      vim.lsp.buf.hover({ border = "rounded", max_width = 100, max_height = 30 })
+    end, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = "LSP Declaration" }))
     vim.keymap.set("n", 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))
     vim.keymap.set('n', '<leader>K', function() require('trouble').toggle('lsp_references') end, vim.tbl_extend('force', opts, { desc = 'LSP References' }))
@@ -941,28 +963,22 @@ vim.lsp.config("svelte", {
   }
 })
 vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
-local ts_inlay_hints = {
-  includeInlayFunctionParameterTypeHints = true,
-  includeInlayFunctionLikeReturnTypeHints = true,
-  includeInlayEnumMemberValueHints = true,
-}
-vim.lsp.config("ts_ls", {
+-- TypeScript 7 includes its native LSP (`tsc --lsp`). Do not also enable ts_ls:
+-- ts_ls wraps the legacy tsserver.js, which TypeScript 7 no longer ships.
+-- Keep useful parameter/return hints, but hide inferred local/property types. SDK
+-- calls (for example `const response = await client...`) otherwise produce huge
+-- inline type labels; use K on the name when the complete inferred type is needed.
+vim.lsp.config("tsc", {
   capabilities = capabilities,
-  -- anchor ts_ls to the folder containing tsconfig/package.json (e.g. frontend/ in Wails projects)
-  -- so it finds node_modules correctly and auto-imports work
-  root_markers = { "tsconfig.json", "jsconfig.json", "package.json" },
-  filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-  init_options = {
-    preferences = {
-      includeCompletionsForModuleExports = true,
-      includeCompletionsWithInsertText = true,
-      importModuleSpecifierPreference = "non-relative",
-    }
-  },
   settings = {
-    typescript = { inlayHints = ts_inlay_hints },
-    javascript = { inlayHints = ts_inlay_hints },
-  }
+    ["js/ts"] = {
+      inlayHints = {
+        variableTypes = { enabled = false },
+        propertyDeclarationTypes = { enabled = false },
+        parameterNames = { enabled = "none" },
+      },
+    },
+  },
 })
 vim.lsp.config("prismals", {
   capabilities = capabilities,
@@ -1025,7 +1041,7 @@ vim.lsp.enable("codebook") -- pacman -S codebook-lsp
 vim.lsp.enable("svelte") -- npm install -g svelte-language-server
 vim.lsp.enable("gh_actions_ls") -- npm install -g gh-actions-language-server
 vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
-vim.lsp.enable("ts_ls") -- npm install -g typescript typescript-language-server
+vim.lsp.enable("tsc") -- TypeScript 7+: native LSP via `tsc --lsp`
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 vim.lsp.enable("clangd")
 vim.lsp.enable("tailwindcss") -- npm i -g @tailwindcss/language-server
@@ -1048,6 +1064,14 @@ vim.api.nvim_create_autocmd('FileType', {
     end
     vim.wo[0][0].foldlevel = 99  -- Open all folds by default
   end
+})
+
+vim.filetype.add({
+  extension = {
+    tsx = "typescriptreact",
+    jsx = "javascriptreact",
+    prisma = "prisma",
+  },
 })
 
 -- Treesitter's own indentexpr has no special case for `/** */` continuation
