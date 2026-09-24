@@ -767,6 +767,7 @@ vim.keymap.set("n", "<leader>ff", function() builtin.find_files({ hidden = true,
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, {desc = "Telescope live grep"})
 vim.keymap.set("n", "<leader>fb", builtin.buffers, {desc = "Telescope buffers"})
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, {desc = "Telescope help tags"})
+vim.keymap.set("n", "<leader>fhs", builtin.keymaps, {desc = "Telescope keymaps"})
 -- for todo list
 vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", {desc = "Telescope todo list"})
 -- for recent file
@@ -806,8 +807,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local opts = { buffer = args.buf }
     -- enable inlay hints (inline type info, param names, return types)
     vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
-    -- goto def is <C-]> that I prefer because we can use <C-t> to go back
-    -- vim.keymap.set('n', 'gd', function() require('trouble').toggle('lsp_definitions') end, vim.tbl_extend('force', opts, { desc = 'LSP Definition' }))
+    -- Override Vim's built-in local-declaration search with the LSP definition request.
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition,
+      vim.tbl_extend("force", opts, { desc = "LSP Definition" }))
     vim.keymap.set("n", "K", function()
       vim.lsp.buf.hover({ border = "rounded", max_width = 100, max_height = 30 })
     end, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
@@ -963,13 +965,55 @@ vim.lsp.config("svelte", {
   }
 })
 vim.lsp.config("gh_actions_ls", {capabilities = capabilities})
--- TypeScript 7 includes its native LSP (`tsc --lsp`). Do not also enable ts_ls:
--- ts_ls wraps the legacy tsserver.js, which TypeScript 7 no longer ships.
+-- Select one TypeScript LSP per workspace: TS < 7 uses ts_ls (tsserver), while
+-- TS 7+ uses the native `tsc --lsp`.  In a monorepo, the nearest package.json
+-- declaring TypeScript wins; packages without it inherit the declaration above.
+local ts_root_markers = { "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb", "bun.lock", ".git" }
+local function ts_project_root(bufnr)
+  local deno_root = vim.fs.root(bufnr, { "deno.json", "deno.jsonc", "deno.lock" })
+  local root = vim.fs.root(bufnr, ts_root_markers) or vim.fn.getcwd()
+  if deno_root and #deno_root >= #root then return nil end
+  return root
+end
+
+local function ts_major_from_package(path)
+  if vim.fn.filereadable(path) ~= 1 then return nil end
+  local ok, package = pcall(vim.json.decode, table.concat(vim.fn.readfile(path), "\n"))
+  if not ok then return nil end
+  local version = (package.devDependencies or {}).typescript
+    or (package.dependencies or {}).typescript
+    or (package.peerDependencies or {}).typescript
+  return type(version) == "string" and tonumber(version:match("(%d+)")) or nil
+end
+
+local function ts_lsp_kind(bufnr)
+  local root = ts_project_root(bufnr)
+  if not root then return nil end
+  local dir = vim.fs.dirname(vim.api.nvim_buf_get_name(bufnr))
+  while dir and dir:sub(1, #root) == root do
+    local major = ts_major_from_package(vim.fs.joinpath(dir, "package.json"))
+    if major then return major >= 7 and "tsc" or "ts_ls" end
+    if dir == root then break end
+    dir = vim.fs.dirname(dir)
+  end
+  -- No package declaration: prefer native LSP when the default tsc supports it.
+  local result = vim.system({ "tsc", "--version" }, { text = true }):wait()
+  local major = tonumber((result.stdout or ""):match("Version%s+(%d+)"))
+  return major and major >= 7 and "tsc" or "ts_ls"
+end
+
+local function ts_root_for(kind)
+  return function(bufnr, on_dir)
+    if ts_lsp_kind(bufnr) == kind then on_dir(ts_project_root(bufnr)) end
+  end
+end
+
 -- Keep useful parameter/return hints, but hide inferred local/property types. SDK
 -- calls (for example `const response = await client...`) otherwise produce huge
 -- inline type labels; use K on the name when the complete inferred type is needed.
 vim.lsp.config("tsc", {
   capabilities = capabilities,
+  root_dir = ts_root_for("tsc"),
   settings = {
     ["js/ts"] = {
       inlayHints = {
@@ -979,6 +1023,10 @@ vim.lsp.config("tsc", {
       },
     },
   },
+})
+vim.lsp.config("ts_ls", {
+  capabilities = capabilities,
+  root_dir = ts_root_for("ts_ls"),
 })
 vim.lsp.config("prismals", {
   capabilities = capabilities,
@@ -1041,7 +1089,7 @@ vim.lsp.enable("codebook") -- pacman -S codebook-lsp
 vim.lsp.enable("svelte") -- npm install -g svelte-language-server
 vim.lsp.enable("gh_actions_ls") -- npm install -g gh-actions-language-server
 vim.lsp.enable("jsonls") -- npm i -g vscode-langservers-extracted
-vim.lsp.enable("tsc") -- TypeScript 7+: native LSP via `tsc --lsp`
+vim.lsp.enable({ "tsc", "ts_ls" }) -- selected from the nearest TypeScript version declaration
 vim.lsp.enable("qmlls") -- sudo pacman -S qt6-declarative
 vim.lsp.enable("clangd")
 vim.lsp.enable("tailwindcss") -- npm i -g @tailwindcss/language-server
