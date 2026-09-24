@@ -1,54 +1,52 @@
 local M = {}
 
----Locate the friendly-snippets plugin root from Neovim's runtime path.
----@return string|nil root Plugin directory, or nil when friendly-snippets is unavailable.
-local function friendly_snippets_root()
+---Locate the installed and personal snippet collections.
+---@return string[] roots Directories containing package.json snippet manifests.
+local function snippet_roots()
+  local roots = {}
+  local personal = vim.fs.joinpath(vim.fn.stdpath("config"), "snippets")
+  if vim.fn.filereadable(vim.fs.joinpath(personal, "package.json")) == 1 then
+    table.insert(roots, personal)
+  end
   local global = vim.api.nvim_get_runtime_file("snippets/global.json", false)[1]
-  return global and vim.fs.dirname(vim.fs.dirname(global)) or nil
+  if global then table.insert(roots, vim.fs.dirname(vim.fs.dirname(global))) end
+  return roots
 end
 
 ---Load snippets available to Blink for the current buffer filetype.
 ---@return table[] entries Normalized snippets suitable for a Telescope finder.
 local function snippets()
-  local root = friendly_snippets_root()
   local current_filetype = vim.bo.filetype
-  if not root then
-    vim.notify("friendly-snippets is not installed", vim.log.levels.WARN)
-    return {}
-  end
-
-  local package_file = root .. "/package.json"
-  local ok, package = pcall(vim.json.decode, table.concat(vim.fn.readfile(package_file), "\n"))
-  if not ok then
-    vim.notify("Could not read friendly-snippets/package.json", vim.log.levels.WARN)
-    return {}
-  end
-
   local results = {}
-  for _, source in ipairs(package.contributes.snippets or {}) do
-    local languages = type(source.language) == "table" and source.language or { source.language }
-    -- Match Blink's defaults: snippets for this filetype plus those registered as `all`.
-    local is_relevant = vim.tbl_contains(languages, current_filetype) or vim.tbl_contains(languages, "all")
-    local ok_file, definitions = false, nil
-    if is_relevant then
-      ok_file, definitions = pcall(vim.json.decode, table.concat(vim.fn.readfile(root .. "/" .. source.path), "\n"))
-    end
-    if ok_file then
-      local filetypes = table.concat(languages, ", ")
-      for name, snippet in pairs(definitions) do
-        local body = type(snippet.body) == "table" and table.concat(snippet.body, "\n") or snippet.body or ""
-        local prefixes = type(snippet.prefix) == "table" and table.concat(snippet.prefix, ", ") or snippet.prefix or ""
-        local description = type(snippet.description) == "table" and table.concat(snippet.description, " ") or snippet.description or ""
-        -- `search` is deliberately comprehensive: Telescope's fzf sorter
-        -- matches the name, trigger, description, filetype, and full body.
-        table.insert(results, {
-          name = name,
-          prefix = prefixes,
-          description = description,
-          filetypes = filetypes,
-          body = body,
-          search = table.concat({ name, prefixes, description, filetypes or "", body }, " "),
-        })
+  for _, root in ipairs(snippet_roots()) do
+    local ok, package = pcall(vim.json.decode, table.concat(vim.fn.readfile(root .. "/package.json"), "\n"))
+    if ok then
+      for _, source in ipairs(package.contributes.snippets or {}) do
+        local languages = type(source.language) == "table" and source.language or { source.language }
+        -- Match Blink's defaults: snippets for this filetype plus those registered as `all`.
+        local is_relevant = vim.tbl_contains(languages, current_filetype) or vim.tbl_contains(languages, "all")
+        local ok_file, definitions = false, nil
+        if is_relevant then
+          ok_file, definitions = pcall(vim.json.decode, table.concat(vim.fn.readfile(root .. "/" .. source.path), "\n"))
+        end
+        if ok_file then
+          local filetypes = table.concat(languages, ", ")
+          for name, snippet in pairs(definitions) do
+            local body = type(snippet.body) == "table" and table.concat(snippet.body, "\n") or snippet.body or ""
+            local prefixes = type(snippet.prefix) == "table" and table.concat(snippet.prefix, ", ") or snippet.prefix or ""
+            local description = type(snippet.description) == "table" and table.concat(snippet.description, " ") or snippet.description or ""
+            -- `search` is deliberately comprehensive: Telescope's fzf sorter
+            -- matches the name, trigger, description, filetype, and full body.
+            table.insert(results, {
+              name = name,
+              prefix = prefixes,
+              description = description,
+              filetypes = filetypes,
+              body = body,
+              search = table.concat({ name, prefixes, description, filetypes or "", body }, " "),
+            })
+          end
+        end
       end
     end
   end

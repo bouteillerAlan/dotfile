@@ -1,0 +1,36 @@
+return {
+  { import = "plugins.specs.neotest" }, -- nvim-neotest/neotest
+  { import = "plugins.specs.startuptime" }, -- dstein64/vim-startuptime
+  { import = "plugins.specs.overseer" }, -- stevearc/overseer.nvim
+  { import = "plugins.specs.flash" }, -- folke/flash.nvim
+  { import = "plugins.specs.cloak" }, -- laytan/cloak.nvim
+  { import = "plugins.specs.fugitive" }, -- tpope/vim-fugitive
+  { import = "plugins.specs.todo-comments" }, -- folke/todo-comments.nvim
+  { import = "plugins.specs.gitsigns" }, -- lewis6991/gitsigns.nvim
+  { import = "plugins.specs.oil" }, -- stevearc/oil.nvim
+  { import = "plugins.specs.undotree" }, -- mbbill/undotree
+  { import = "plugins.specs.matchup" }, -- andymass/vim-matchup
+  { import = "plugins.specs.treesitter" }, -- nvim-treesitter/nvim-treesitter
+  { import = "plugins.specs.java" }, -- nvim-java/nvim-java
+  { import = "plugins.specs.lspconfig" }, -- neovim/nvim-lspconfig
+  { import = "plugins.specs.dap-react-native" }, -- AkisArou/nvim-dap-react-native
+  { import = "plugins.specs.dap" }, -- mfussenegger/nvim-dap
+  { import = "plugins.specs.dap-view" }, -- igorlfs/nvim-dap-view
+  { import = "plugins.specs.blink-cmp" }, -- saghen/blink.cmp
+  { import = "plugins.specs.oasis" }, -- uhs-robert/oasis.nvim
+  { import = "plugins.specs.lualine" }, -- nvim-lualine/lualine.nvim
+  { import = "plugins.specs.fidget" }, -- j-hui/fidget.nvim
+  { import = "plugins.specs.telescope-fzf-native" }, -- nvim-telescope/telescope-fzf-native.nvim
+  { import = "plugins.specs.telescope" }, -- nvim-telescope/telescope.nvim
+  { import = "plugins.specs.mini-animate" }, -- nvim-mini/mini.animate
+  { import = "plugins.specs.mini-hipatterns" }, -- nvim-mini/mini.hipatterns
+  { import = "plugins.specs.mini-icons" }, -- nvim-mini/mini.icons
+  { import = "plugins.specs.mini-pairs" }, -- nvim-mini/mini.pairs
+  { import = "plugins.specs.mini-diff" }, -- nvim-mini/mini.diff
+  { import = "plugins.specs.diagflow" }, -- dgagn/diagflow.nvim
+  { import = "plugins.specs.trouble" }, -- folke/trouble.nvim
+  { import = "plugins.specs.inc-rename" }, -- smjonas/inc-rename.nvim
+  { import = "plugins.specs.haunt" }, -- TheNoeTrevino/haunt.nvim
+  { import = "plugins.specs.alpha-nvim" }, -- goolord/alpha-nvim
+  { import = "plugins.specs.tiny-inline-diagnostic" }, -- rachartier/tiny-inline-diagnostic.nvim
+}
