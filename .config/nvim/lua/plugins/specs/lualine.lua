@@ -2,6 +2,87 @@ return {
       "nvim-lualine/lualine.nvim",
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
+        -- Hermes gold-on-navy palette (see ~/Documents/know/hermes-cli-statusbar.md)
+        -- Only the mode segment (a) is a colored pill; everything else (b/c,
+        -- mirrored as x/y) shares one flat background so it doesn't turn
+        -- into a patchwork of differently-colored blocks. Because lualine
+        -- only draws a section separator where the color actually changes,
+        -- this still leaves a visible "/" and "\" right around the pill,
+        -- with the location segment (z) mirroring the mode pill at the far
+        -- right -- one flat run of text bookended by two colored badges.
+        local bg_mantle = "#141C24"
+        local text = "#C0C0C0"
+        local dim = "#8A7A4A"
+        local gold = "#FFD700"
+        local gold_hot = "#FFBF00"
+        local cream = "#FFF8DC"
+        local good = "#8FBC8F"
+        local warn = "#FF8C00"
+        local critical = "#FF6B6B"
+
+        local hermes_theme = {
+          normal = {
+            a = { bg = gold, fg = bg_mantle, gui = "bold" },
+            b = { bg = bg_mantle, fg = text },
+            c = { bg = bg_mantle, fg = dim },
+          },
+          insert = { a = { bg = good, fg = bg_mantle, gui = "bold" } },
+          visual = { a = { bg = warn, fg = bg_mantle, gui = "bold" } },
+          replace = { a = { bg = critical, fg = bg_mantle, gui = "bold" } },
+          command = { a = { bg = cream, fg = bg_mantle, gui = "bold" } },
+          terminal = { a = { bg = gold_hot, fg = bg_mantle, gui = "bold" } },
+          inactive = {
+            a = { bg = bg_mantle, fg = dim },
+            b = { bg = bg_mantle, fg = dim },
+            c = { bg = bg_mantle, fg = dim },
+          },
+        }
+
+        -- Braille density bar in place of the plain "progress" percentage,
+        -- same idea as the Hermes CLI context bar. "%%" is not a typo: a
+        -- literal "%" in the statusline option must be doubled, or Vim's
+        -- statusline parser errors out and the whole bar goes blank.
+        local function scroll_pct()
+          local line = vim.fn.line(".")
+          local total = vim.fn.line("$")
+          return total > 1 and math.floor((line - 1) / (total - 1) * 100) or 100
+        end
+
+        -- Each of the 6 blocks has a fixed color by position (not by scroll
+        -- amount) so the gradient stays put and blocks simply light up in
+        -- their own shade as you reach them, rather than the whole bar
+        -- re-tinting. A lualine `color` option only tints a whole component
+        -- one color, so instead this embeds "%#Group#" tokens straight into
+        -- the returned string -- lualine's supported way to multi-color a
+        -- single component -- using highlight groups defined once below.
+        vim.api.nvim_set_hl(0, "HermesBrailleHi", { fg = "#FFD700", bg = bg_mantle })
+        vim.api.nvim_set_hl(0, "HermesBrailleMid", { fg = "#FFBF00", bg = bg_mantle })
+        vim.api.nvim_set_hl(0, "HermesBrailleLo", { fg = "#CD7F32", bg = bg_mantle })
+        vim.api.nvim_set_hl(0, "HermesBrailleEmpty", { fg = dim, bg = bg_mantle })
+
+        local braille_tiers = {
+          "HermesBrailleHi", "HermesBrailleHi",
+          "HermesBrailleMid", "HermesBrailleMid",
+          "HermesBrailleLo", "HermesBrailleLo",
+        }
+
+        local function braille_progress()
+          local pct = scroll_pct()
+          local width = #braille_tiers
+          local filled = math.floor(pct / 100 * width)
+          local parts = {}
+          for i = 1, width do
+            if i <= filled then
+              parts[i] = "%#" .. braille_tiers[i] .. "#⣿"
+            else
+              parts[i] = "%#HermesBrailleEmpty#⠁"
+            end
+          end
+          -- the number matches the most recently lit block's shade
+          local label_group = filled == 0 and "HermesBrailleEmpty" or braille_tiers[math.min(filled, width)]
+          return table.concat(parts) .. "%#" .. label_group .. "# " .. pct .. "%%"
+        end
+
         -- telescope-style path shortening
         local function shorten_path(path, keep)
           keep = keep or 3
@@ -39,10 +120,73 @@ return {
           return result
         end
 
+        -- Attached LSP client name instead of the full filetype word,
+        -- truncated to 6 chars -- "typescript" is long, "tsc" isn't.
+        -- Several clients can attach to one buffer (formatter, linter,
+        -- spell-checker, ...); only the actual language server tends to
+        -- support go-to-definition, so that's preferred over "just take the
+        -- first one", which could as easily be a spell-checker. Falls back
+        -- to the filetype when nothing matches.
+        local function lsp_short()
+          local clients = vim.lsp.get_clients({ bufnr = 0 })
+          local name
+          for _, client in ipairs(clients) do
+            if client.server_capabilities and client.server_capabilities.definitionProvider then
+              name = client.name
+              break
+            end
+          end
+          name = name or (clients[1] and clients[1].name) or vim.bo.filetype
+          return name:sub(1, 6)
+        end
+
+        -- Mode pill shows only the first letter, in Bold Fraktur lowercase
+        -- (NORMAL -> 𝖓, TERMINAL -> 𝖙, ...). The pill's gui = "bold" can't
+        -- embolden these glyphs, so the bold weight comes from the
+        -- codepoints themselves (capitals U+1D56C..U+1D585, lowercase
+        -- U+1D586..U+1D59F, all 26 letters each).
+        local fraktur = {
+          A = "𝕬", B = "𝕭", C = "𝕮", D = "𝕯", E = "𝕰", F = "𝕱", G = "𝕲",
+          H = "𝕳", I = "𝕴", J = "𝕵", K = "𝕶", L = "𝕷", M = "𝕸", N = "𝕹",
+          O = "𝕺", P = "𝕻", Q = "𝕼", R = "𝕽", S = "𝕾", T = "𝕿", U = "𝖀",
+          V = "𝖁", W = "𝖂", X = "𝖃", Y = "𝖄", Z = "𝖅",
+        }
+        local fraktur_lower = {
+          a = "𝖆", b = "𝖇", c = "𝖈", d = "𝖉", e = "𝖊", f = "𝖋", g = "𝖌",
+          h = "𝖍", i = "𝖎", j = "𝖏", k = "𝖐", l = "𝖑", m = "𝖒", n = "𝖓",
+          o = "𝖔", p = "𝖕", q = "𝖖", r = "𝖗", s = "𝖘", t = "𝖙", u = "𝖚",
+          v = "𝖛", w = "𝖜", x = "𝖝", y = "𝖞", z = "𝖟",
+        }
+
         -- LSP/treesitter loading progress is shown by fidget.nvim (see its
         -- plugin spec below) as floating notifications, not in here.
         require("lualine").setup({
+          options = {
+            theme = hermes_theme,
+            icons_enabled = false,
+            component_separators = { left = "|", right = "|" },
+            section_separators = { left = "", right = "" },
+          },
           sections = {
+            lualine_a = {
+              {
+                "mode",
+                fmt = function(str)
+                  -- V-LINE / V-BLOCK would otherwise all collapse to VISUAL's 𝖛
+                  local overrides = { ["V-LINE"] = "l", ["V-BLOCK"] = "b" }
+                  local first = overrides[str] or str:sub(1, 1):lower()
+                  return fraktur_lower[first] or first
+                end,
+              },
+            },
+            lualine_b = {
+              -- branch name in cream; diff (+/~/-) and diagnostics keep
+              -- their own semantic colors (green/orange/red), which would
+              -- lose meaning if flattened to one color too.
+              { "branch", color = { fg = cream } },
+              "diff",
+              { "diagnostics", sections = { "error", "warn", "hint" } },
+            },
             lualine_c = {
               shortened_filepath,
               function()
@@ -51,13 +195,18 @@ return {
             },
             lualine_x = {
               "encoding",
-              "fileformat",
-              "filetype",
+              {
+                -- line ending name + its raw bytes instead of unix/dos/mac
+                "fileformat",
+                fmt = function(str)
+                  local eol = { unix = "lf 0A", dos = "crlf 0D0A", mac = "cr 0D" }
+                  return eol[str] or str
+                end,
+              },
+              lsp_short,
               "dap_breakpoints",
-              function()
-                return os.date("%Y-%m-%d %H:%M")
-              end,
             },
+            lualine_y = { braille_progress },
           },
         })
       end
