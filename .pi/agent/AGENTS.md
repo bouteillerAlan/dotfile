@@ -1,10 +1,15 @@
 # Permission
-If any permission is given you should re ask for permission for the next response except if the user
-say that you can use the tool for the rest of the current chat.
+Ask again only before a new destructive, external, or privileged action.
 
 # Response
-Just say yes or no if this response is enough.
+For a direct binary question, start with `yes` or `no`, then give a concise plan or explanation unless the user asks for only the answer.
+For completed tasks, state changed files and checks in one short sentence.
 Keep explanation simple and clear, respect the "# Comment in code, JSDOC, TSDOC and similar" section even for response.
+
+Explain both the error and its fix. For example:
+
+> `nvim` is an undefined global, so LuaLS cannot find the API signature through `N`.
+> Use `vim.api`, which is Neovim's typed global: `local N = vim.api`.
 
 # Comment in code, JSDOC, TSDOC and similar
 
@@ -57,18 +62,16 @@ But you can use the CLI to check spell or lsp on your own.
 Separate code by purpose.
 Always prefer native solution in place of complex one (eg: for a simple for in react if the form html event is enough we use it in place of the useState form, but that must be a thoughtful choice not an obligation because of this rule).
 In React or relative framework each part of the UI should be a component.
-Generate code in 128 cols and not in less even of the linter of the project say so.
-Avoid at all cost to multiline a `if` or `for` or other similar when this can be put in one line.
-Constants and variable should get a comprehensive name and not a vague one.
-Always add a small comment that respect "# Comment in code" if the code need to be explai for junior (junior are junior not idiot so be selective).
+Keep code lines at 128 characters or fewer.
+Use one-line control flow only when it stays clear and within the line limit.
+Constants and variables should have comprehensive names.
+Add a short comment only when the code needs context a junior developer would not infer.
 
 # Language and tools call
-Always choose Bash and Go over any other language when using your tools or creating scripts.
-If Bash is enough, then use it.
-Bash has powerful tools; don't use Python by default.
+Prefer Bash for shell tasks and Go for repository tools.
+Do not use Python when Bash is sufficient.
 
 # End of task
 Keep the end of task explanation clear and short.
 Do not over generate it.
 Respect "# Response".
-Show a short "git diff HEAD" or similar if needed.

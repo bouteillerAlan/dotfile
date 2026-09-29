@@ -7,7 +7,7 @@ zstyle ':omz:update' frequency 3
 DISABLE_AUTO_TITLE="false"
 ENABLE_CORRECTION="false"
 
-plugins=(git zoxide colorize docker docker-compose heroku nvm yarn ruby zsh-syntax-highlighting zsh-autosuggestions dockolor poetry uv volta)
+plugins=(git zoxide colorize docker docker-compose heroku nvm yarn ruby zsh-syntax-highlighting zsh-autosuggestions dockolor poetry uv)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -19,10 +19,18 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 export EDITOR="$(which nvim)"
 export VISUAL="$EDITOR"
 
-alias c="claude"
-alias cloclo="claude"
-alias h="herdr"
+alias oui='echo "Ho?"'
+alias yes='echo "Ho?"'
+
+alias :r="source ~/.zshrc"
+alias reload="source ~/.zshrc"
+
+alias :t="tmux"
+alias :h="herdr"
 alias :q="exit"
+alias :c="claude"
+
+alias gdh="git diff HEAD"
 alias nv="nvim"
 alias ls="eza -la --icons=always --git"
 alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- for grep, tldr -- for man, glances or bpytop -- for ressource monitor, gping -- for ping, screenfetch -- for info, lolcat and figlet -- for fun' | lolcat"
@@ -32,65 +40,35 @@ alias batt="cat /sys/class/power_supply/BAT0/capacity"
 # alias ssh="kitten ssh"
 
 # source the env for rust
-#. "$HOME/.cargo/env"
+# . "$HOME/.cargo/env"
 
 # devcontainer
 export PATH="$HOME/.devcontainers/bin:$PATH"
-
-# volta
-# allow the use of pnpm with volta https://docs.volta.sh/advanced/pnpm
-export VOLTA_FEATURE_PNPM=1
-export PATH="$HOME/.volta/bin:$PATH"
 
 # go
 export PATH="$PATH:/usr/local/go/bin"
 export PATH="$PATH:$HOME/go/bin"
 
 # usefull for kitty
-export GPG_TTY=$(tty)
+# export GPG_TTY=$(tty)
 
 export ANDROID_HOME="$HOME/Android/Sdk"
 # for emulator
 export PATH="$PATH:$HOME/Android/Sdk/emulator/"
 # for adb
 export PATH="$PATH:$HOME/Android/Sdk/platform-tools/"
-
-
-#export PATH="$HOME/.symfony5/bin:$PATH"
+# symfony
+export PATH="$HOME/.symfony5/bin:$PATH"
 
 # force editor for sudo user
-export SUDO_EDITOR="nvim"
-
-# Detect project-local Turbo for the Oh My Posh prompt.
-_omp_turbo_version() {
-  local dir="$PWD" root="" version=""
-  while [[ "$dir" != "/" ]]; do
-    if [[ -f "$dir/package.json" ]]; then root="$dir"; break; fi
-    dir="${dir:h}"
-  done
-  unset POSH_TURBO_VERSION
-  [[ -z "$root" ]] && return
-  [[ ! -f "$root/turbo.json" && ! -f "$root/turbo.jsonc" ]] && return
-
-  if [[ -x "$root/node_modules/.bin/turbo" ]]; then
-    version="$($root/node_modules/.bin/turbo --version 2>/dev/null | head -1)"
-  elif (( $+commands[turbo] )); then
-    version="$(turbo --version 2>/dev/null | head -1)"
-  elif (( $+commands[node] )); then
-    version="$(node -e 'const p=require(process.argv[1]); console.log((p.devDependencies||{}).turbo||(p.dependencies||{}).turbo||"")' "$root/package.json" 2>/dev/null)"
-  fi
-  [[ -n "$version" ]] && export POSH_TURBO_VERSION="$version"
-}
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _omp_turbo_version
+export SUDO_EDITOR="nvim -u /home/a2n/.config/nvim"
 
 # eval "$(starship init zsh)"
-eval "$(/home/a2n/.local/bin/oh-my-posh init zsh --config /home/a2n/.config/oh-my-posh/star.omp.json)"
+# eval "$(/home/a2n/.local/bin/oh-my-posh init zsh --config /home/a2n/.config/oh-my-posh/star.omp.json)"
 # eval "$(zellij setup --generate-auto-start zsh)"
+eval "$(oh-my-posh init zsh --config ~/.config/miel/oh-my-posh/themes/miel.omp.json)"
 
-# ----------------------
 # PYTHON
-# ----------------------
 # need pyenv pyenv-virtualenv poetry
 # PYENV
 #export PATH="$HOME/.pyenv/bin:$PATH"
@@ -98,19 +76,19 @@ eval "$(/home/a2n/.local/bin/oh-my-posh init zsh --config /home/a2n/.config/oh-m
 #eval "$(pyenv virtualenv-init -)"
 # POETRY
 #export PATH="$HOME/.local/bin:$PATH"
-# -----------------------
 
+# SDKMAN_DIR
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # pnpm
-export PNPM_HOME="/home/a2n/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+# export PNPM_HOME="/home/a2n/.local/share/pnpm"
+# case ":$PATH:" in
+#   *":$PNPM_HOME:"*) ;;
+#   *) export PATH="$PNPM_HOME:$PATH" ;;
+# esac
 
-# add Pulumi to the PATH
+# Pulumi
 export PATH=$PATH:/home/a2n/.pulumi/bin
 
 # bun completions
@@ -132,6 +110,7 @@ export PATH="$PATH:$HOME/.config/emacs/bin"
 # opencode
 export PATH=/home/a2n/.opencode/bin:$PATH
 
+# atuin
 . "$HOME/.atuin/bin/env"
-
 eval "$(atuin init zsh)"
+eval "$(~/.local/bin/mise activate zsh)"

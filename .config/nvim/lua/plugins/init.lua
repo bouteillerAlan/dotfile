@@ -17,8 +17,6 @@ return {
   { import = "plugins.specs.dap" }, -- mfussenegger/nvim-dap
   { import = "plugins.specs.dap-view" }, -- igorlfs/nvim-dap-view
   { import = "plugins.specs.blink-cmp" }, -- saghen/blink.cmp
-  { import = "plugins.specs.oasis" }, -- uhs-robert/oasis.nvim
-  { import = "plugins.specs.lualine" }, -- nvim-lualine/lualine.nvim
   { import = "plugins.specs.fidget" }, -- j-hui/fidget.nvim
   { import = "plugins.specs.telescope-fzf-native" }, -- nvim-telescope/telescope-fzf-native.nvim
   { import = "plugins.specs.telescope" }, -- nvim-telescope/telescope.nvim
@@ -33,4 +31,6 @@ return {
   { import = "plugins.specs.haunt" }, -- TheNoeTrevino/haunt.nvim
   { import = "plugins.specs.alpha-nvim" }, -- goolord/alpha-nvim
   { import = "plugins.specs.tiny-inline-diagnostic" }, -- rachartier/tiny-inline-diagnostic.nvim
+  { import = "plugins.specs.miel" },
+  { import = "plugins.418.418" },
 }

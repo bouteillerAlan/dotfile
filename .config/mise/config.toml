@@ -1,0 +1,4 @@
+[tools]
+node = "latest"
+pnpm = "latest"
+yarn = "1.22.10"

@@ -122,8 +122,6 @@ function M.open()
   }):find()
 end
 
----Register the normal-mode mapping for the snippet finder.
----@return nil
 function M.setup()
   vim.keymap.set("n", "<leader>fs", M.open, { desc = "Find friendly snippet" })
 end

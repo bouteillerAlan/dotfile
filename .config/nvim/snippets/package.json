@@ -2,7 +2,7 @@
   "name": "a2n-snippets",
   "contributes": {
     "snippets": [
-      { "language": "all", "path": "./all.json" }
+      { "language": "all", "path": "./snippets.json" }
     ]
   }
 }

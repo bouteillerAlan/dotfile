@@ -17,6 +17,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("config.options").setup()
+-- Register before Treesitter emits TSUpdate during startup.
 require("config.treesitter_progress").setup()
 
 require("lazy").setup({
@@ -24,9 +25,20 @@ require("lazy").setup({
   checker = { enabled = true, minimum_release_age = "14d" },
 })
 
-require("config.keymaps").setup()
+-- basic
 require("config.lsp").setup()
 require("config.treesitter").setup()
+require("config.keymaps").setup()
+
+-- overseer script
+-- light yanked text
+-- floating term
 require("config.commands").setup()
+-- auto typing for ts/js code
 require("config.autotype").setup()
 
+-- pi integration (`:SuperAi`, visual `<leader>pi` `<leader>pia`, Esc aborts)
+require("config.pi_ai").setup()
+
+-- snippet finder
+require("config.snipet_finder").setup()

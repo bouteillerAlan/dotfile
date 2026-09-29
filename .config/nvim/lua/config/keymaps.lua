@@ -16,7 +16,6 @@ vim.keymap.set("n", "<leader>fhs", builtin.keymaps, {desc = "Telescope keymaps"}
 vim.keymap.set("n", "<leader>ft", "<CMD>TodoTelescope<CR>", {desc = "Telescope todo list"})
 -- for recent file
 vim.keymap.set("n", "<Leader>fr", "<cmd>lua require('telescope').extensions.recent_files.pick()<CR>", {desc = "telescope recent file"})
-require("config.snipet_finder").setup()
 
 -- oil
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
@@ -24,9 +23,6 @@ vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
 
 -- cloak
 vim.keymap.set("n", "<leader>hh", "<cmd>CloakToggle<cr>", { desc = "Toggle cloak" })
-
--- pi SuperAi integration (`:SuperAi`, visual `<leader>pi`, Esc aborts pi or clears search highlight)
-require("config.pi_ai").setup()
 
 -- todo list
 vim.keymap.set("n", "]t", function() require("todo-comments").jump_next() end, { desc = "Next todo comment" })
@@ -93,7 +89,6 @@ vim.keymap.set('n', '<C-z>', '<cmd>undo<cr>', {desc = 'undo one change'})
 -- overseer
 vim.keymap.set('n', '<leader>ot', vim.cmd.OverseerToggle, {desc = 'overseer toogle'})
 vim.keymap.set('n', '<leader>or', vim.cmd.OverseerRun, {desc = 'overseer run'})
-
 
 end
 

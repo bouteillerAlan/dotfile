@@ -1,6 +1,5 @@
 -- auto type in typescript (eg: const x = 1 => const x: number = 1)
 -- support "heavy" type via tsc and "light" one via treesitter
-
 local M = {}
 
 local literal_types = {
