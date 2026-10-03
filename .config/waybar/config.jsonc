@@ -8,10 +8,10 @@
   "height": 0,
 
   "modules-left": [
+    "custom/power",
+    "custom/separator3",
     "hyprland/workspaces",
     "custom/separator",
-    // "tray",
-    // "custom/separator7",
     "custom/updates",
     "custom/separator3",
     "custom/docker",
@@ -30,6 +30,7 @@
   "modules-right": [
     "custom/separator",
     "bluetooth",
+    "custom/audio-output",
     "custom/separator3",
     "backlight",
     "custom/separator4",
@@ -44,6 +45,8 @@
     "memory",
     "custom/separator3",
     "cpu",
+    "custom/separator3",
+    "custom/service",
     "custom/separator2",
     "tray"
   ],
@@ -52,19 +55,25 @@
     "disable-scroll": true,
     "all-outputs": true,
     "cursor": true,
-    "format": "{icon}",
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": [],
-      "4": [],
-      "5": [],
-      "6": [],
-      "7": [],
-      "8": [],
-      "9": [],
-      "10": []
+    "format": " {name} {windows}",
+    "format-window-separator": "",
+    "window-rewrite-default": ".",
+    "window-rewrite": {
+      ".*": "."
     }
+  },
+
+  "custom/power": {
+    "format": " ⏻ ",
+    "tooltip": false,
+    "on-click": "wleave"
+  },
+
+  "custom/service": {
+    "exec": "~/.config/waybar/scripts/service.sh",
+    "return-type": "json",
+    "interval": 30,
+    "tooltip": true
   },
 
   "custom/separator": {
@@ -107,6 +116,7 @@
     "return-type": "json",
     "interval": 2
   },
+
   "custom/updates": {
     "format": "{}",
     "return-type": "json",
@@ -132,19 +142,22 @@
 
   "clock": {
     "format": "{:%H:%M • %d/%m/%Y}",
-    "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "calendar": {
-      "mode": "month",
-      "mode-mon-col": 3,
-      "weeks-pos": "right",
-      "on-scroll": 1
-    },
-    "actions": {
-      "on-click-right": "mode",
-      "on-scroll-up": "shift_up",
-      "on-scroll-down": "shift_down"
-    }
+    "on-click": "pkill -x waycal || waycal",
+    "tooltip-format": "Calendar",
+    // "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    // "calendar": {
+    //   "mode": "month",
+    //   "mode-mon-col": 3,
+    //   "weeks-pos": "right",
+    //   "on-scroll": 1
+    // }
+    // "actions": {
+    //   "on-click-right": "mode",
+    //   "on-scroll-up": "shift_up",
+    //   "on-scroll-down": "shift_down"
+    // }
   },
+
   "cpu": {
     "interval": 2,
     "format": " {usage:02}%",
@@ -167,7 +180,7 @@
 
   "backlight": {
     "device": "intel_backlight",
-    "format": "bl {percent}%",
+    "format": "󰱌 {percent}%",
     "tooltip-format": "🌕 {percent}%",
     "format-icons": [
       "󰃜",
@@ -198,11 +211,11 @@
   },
 
   "battery": {
-    "format": "bat {capacity}%",
-    "format-discharging": "bat {capacity}%",
-    "format-charging": "bat {capacity}% ",
-    "format-plugged": "bat {capacity}% ",
-    "format-full": "bat {capacity}%",
+    "format": "󱟢 {capacity}%",
+    "format-discharging": "󱟞 {capacity}%",
+    "format-charging": "󰂄 {capacity}% ",
+    "format-plugged": "󱠴 {capacity}% ",
+    "format-full": "󱟢 {capacity}%",
     "tooltip-format": "{capacity}%",
 
     "format-icons": {
@@ -249,6 +262,15 @@
     "format-connected": "bt <span style='italic' weight='900' color='#df6124'>{status}</span> {num_connections}",
     "tooltip-format": "Connected devices: {num_connections}",
     "on-click": "blueman-manager"
+  },
+
+  "custom/audio-output": {
+    "exec": "~/.config/waybar/scripts/audio-output.sh",
+    "return-type": "json",
+    "restart-interval": 2,
+    "hide-empty-text": true,
+    "exec-on-event": false,
+    "on-click": "pavucontrol"
   },
 
   "pulseaudio": {
