@@ -26,8 +26,8 @@ hl.monitor({
 -- proart, gauche
 hl.monitor({
     output   = outL,
-    mode     = "2560x1440@59.95",
-    position = "-2560x0",
+    mode     = "1920x1080@59",
+    position = "-1920x0",
     scale    = 1,
 })
 
@@ -39,9 +39,11 @@ hl.monitor({
 -- Set programs that you use
 local terminal    = "ghostty"
 local fileManager = "dolphin"
-local menu        = "rofi -show drun"
-local winmenu     = "rofi -show window"
-local calc        = "rofi -show calc -modi calc -no-show-match -no-sort"
+local menu        = "~/.config/bemenu/app-explorer"
+local winmenu     = "~/.config/bemenu/window-picker"
+local calc        = "~/.config/bemenu/calculator"
+local emoji       = "~/.config/bemenu/emoji-picker"
+local yankHistory = "~/.config/bemenu/yank-history"
 
 -------------------
 ---- AUTOSTART ----
@@ -290,7 +292,7 @@ hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(emoji))
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(winmenu))
@@ -299,8 +301,7 @@ hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -p 'Yank!' | cliphist decode | wl-copy"))
-hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("rofi -modi emoji -show emoji"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(yankHistory))
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + H",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
