@@ -29,6 +29,7 @@ return {
   { import = "plugins.specs.trouble" }, -- folke/trouble.nvim
   { import = "plugins.specs.inc-rename" }, -- smjonas/inc-rename.nvim
   { import = "plugins.specs.haunt" }, -- TheNoeTrevino/haunt.nvim
+  -- { import = "plugins.specs.alpha-nvim" }, -- goolord/alpha-nvim
   { import = "plugins.specs.tiny-inline-diagnostic" }, -- rachartier/tiny-inline-diagnostic.nvim
   { import = "plugins.specs.miel" },
   { import = "plugins.418.418" },

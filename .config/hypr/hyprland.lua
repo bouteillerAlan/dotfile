@@ -1,59 +1,29 @@
-------------------
----- MONITORS ----
-------------------
+local outMain = "eDP-1"
+local workTwo = "HDMI-A-1"
 
--- See https://wiki.hypr.land/Configuring/Basics/Monitors/
-
-local outR = "DP-6" -- serial: T4LMQS092416
-local outL = "DP-4" -- serial: RBLMHK000532
-local outC = "DP-5" -- serial: T4LMQS092529
-
--- center
 hl.monitor({
-    output   = outC,
-    mode     = "2560x1440@240",
+    output   = outMain,
+    mode     = "2560x1600@240",
     position = "0x0",
     scale    = 1,
 })
--- droite
+
 hl.monitor({
-    output   = outR,
-    mode     = "2560x1440@240",
+    output   = workTwo,
+    mode     = "1920x1080@60",
     position = "2560x0",
     scale    = 1,
-    transform = 3,
-})
--- proart, gauche
-hl.monitor({
-    output   = outL,
-    mode     = "1920x1080@59",
-    position = "-1920x0",
-    scale    = 1,
 })
 
-
----------------------
----- MY PROGRAMS ----
----------------------
-
--- Set programs that you use
 local terminal    = "ghostty"
 local fileManager = "dolphin"
-local menu        = "~/.config/bemenu/app-explorer"
-local winmenu     = "~/.config/bemenu/window-picker"
-local calc        = "~/.config/bemenu/calculator"
-local emoji       = "~/.config/bemenu/emoji-picker"
-local yankHistory = "~/.config/bemenu/yank-history"
+local menu        = "rofi -show drun"
+local winmenu     = "rofi -show window"
+local emoji       = "rofi -modi emoji -show emoji"
+local calc        = "rofi -show calc -modi calc -no-show-match -no-sort"
+local yank        = "cliphist list | rofi -dmenu -p 'Yank!' | cliphist decode | wl-copy"
+local shutdown    = "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"
 
--------------------
----- AUTOSTART ----
--------------------
-
--- See https://wiki.hypr.land/Configuring/Basics/Autostart/
-
--- Autostart necessary processes (like notifications daemons, status bars, etc.)
--- Or execute your favorite apps at launch like this:
---
 hl.on("hyprland.start", function ()
   hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
   hl.exec_cmd("kwalletd6")
@@ -64,48 +34,14 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd("fcitx5 -d")
   hl.exec_cmd("easyeffects -w")
   hl.exec_cmd("hypridle")
-  hl.dispatch(hl.dsp.focus({ workspace = 1 }))
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
   hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
 end)
 
-
--------------------------------
----- ENVIRONMENT VARIABLES ----
--------------------------------
-
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
-
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 
------------------------
------ PERMISSIONS -----
------------------------
-
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Permissions/
--- Please note permission changes here require a Hyprland restart and are not applied on-the-fly
--- for security reasons
-
--- hl.config({
---   ecosystem = {
---     enforce_permissions = true,
---   },
--- })
-
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
--- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
--- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
-
-
------------------------
----- LOOK AND FEEL ----
------------------------
-
--- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     general = {
         gaps_in  = 5,
@@ -114,24 +50,18 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
+            active_border   = "rgba(7fcf78ee)", -- Oasis Moonlight Dark thm_green
             inactive_border = "rgba(595959aa)",
         },
 
-        -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
         resize_on_border = true,
-
-        -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
         allow_tearing = false,
-
         layout = "dwindle",
     },
 
     decoration = {
         rounding       = 4,
         rounding_power = 2,
-
-        -- Change transparency of focused and unfocused windows
         active_opacity   = 1,
         inactive_opacity = 1,
 
@@ -155,14 +85,12 @@ hl.config({
     },
 })
 
--- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
 hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
 hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
 
--- Default springs
 hl.curve("easy",           { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
 
 hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
@@ -183,25 +111,6 @@ hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1, bezier = "alm
 -- hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
 
--- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
--- "Smart gaps" / "No gaps when only"
--- uncomment all if you wish to use that.
--- hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
--- hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
--- hl.window_rule({
---     name  = "no-gaps-wtv1",
---     match = { float = false, workspace = "w[tv1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
--- hl.window_rule({
---     name  = "no-gaps-f1",
---     match = { float = false, workspace = "f[1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
-
--- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
     dwindle = {
         preserve_split = true, -- You probably want this
@@ -209,23 +118,18 @@ hl.config({
     },
 })
 
--- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
 hl.config({
     master = {
         new_status = "master",
     },
 })
 
--- See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
 hl.config({
     scrolling = {
         fullscreen_on_one_column = true,
     },
 })
 
-----------------
-----  MISC  ----
-----------------
 -- !!! the text is deactivated directly in hyprpaper
 hl.config({
     misc = {
@@ -234,11 +138,6 @@ hl.config({
     },
 })
 
-
----------------
----- INPUT ----
----------------
-
 hl.config({
     input = {
         kb_layout  = "us",
@@ -246,72 +145,39 @@ hl.config({
         kb_model   = "",
         kb_options = "",
         kb_rules   = "",
-
         follow_mouse = 1,
-
         sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
-
         touchpad = {
             natural_scroll = false,
         },
     },
 })
 
--- hl.gesture({
---     fingers = 3,
---     direction = "horizontal",
---     action = "workspace"
--- })
-
--- Example per-device config
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
--- hl.device({
---     name        = "epic-mouse-v1",
---     sensitivity = -0.5,
--- })
-
--- ProArt PA169CDV (left monitor, DP-4): bind touch/pen to correct output
-hl.device({
-    name   = "tablet-isd-v4-stylus",   -- pen/stylus
-    output = outL,
-})
-hl.device({
-    name   = "tablet-isd-v4",          -- finger touch
-    output = outL,
-})
-
-
----------------------
----- KEYBINDINGS ----
----------------------
-
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
--- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(emoji))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(shutdown))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd(yank))
+hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd(emoji))
+hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(calc))
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(winmenu))
-hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(calc))
-hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(yankHistory))
+
 -- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + H",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + K",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
-
--- Swap/move active tiled window with the window on the left/right
-hl.bind(mainMod .. " + SHIFT + H", hl.dsp.window.move({ direction = "left" }))
-hl.bind(mainMod .. " + SHIFT + L", hl.dsp.window.move({ direction = "right" }))
-
 hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- Switch workspaces with mainMod + [0-9]
@@ -322,19 +188,23 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 --     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 -- end
 
+-- workspace, screen
 local workspaces = {
-  [1] = "name:srf", -- surf
-  [2] = "name:dev", -- dev
-  [3] = "name:stg", -- setting
-  [4] = "name:cht", -- chat
-  [5] = "name:sde", -- side
+  [1] = { name = "name:srf", monitor = outMain, default = true },
+  [2] = { name = "name:dev", monitor = outMain },
+  [3] = { name = "name:stg", monitor = outMain },
+  [4] = { name = "name:nvi", monitor = workTwo, default = true },
+  [5] = { name = "name:sde", monitor = workTwo },
+  [6] = { name = "name:ext", monitor = workTwo },
 }
 
-for id, name in pairs(workspaces) do
+for id, ws in pairs(workspaces) do
     hl.workspace_rule({
-      workspace = id,
-      persistent = true,
-      default_name = name,
+      workspace    = id,
+      persistent   = true,
+      default_name = ws.name,
+      monitor      = ws.monitor,
+      default      = ws.default,
     })
     hl.bind(mainMod .. " + " .. id, hl.dsp.focus({ workspace = id }))
     hl.bind(mainMod .. " + SHIFT + " .. id, hl.dsp.window.move({ workspace = id }))
@@ -366,28 +236,13 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 
-
---------------------------------
----- WINDOWS AND WORKSPACES ----
---------------------------------
-
--- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
--- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
-
--- workspace → monitor mapping
-hl.workspace_rule({ workspace = 1, monitor = outC })  -- srf → center
-hl.workspace_rule({ workspace = 2, monitor = outL })  -- dev  → left
-hl.workspace_rule({ workspace = 3, monitor = outR })  -- stg  → right
-hl.workspace_rule({ workspace = 4, monitor = outR })  -- cht  → right
-hl.workspace_rule({ workspace = 5, monitor = outR })  -- sde  → right
-
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",
     match = { class = ".*" },
+
     suppress_event = "maximize",
 })
--- suppressMaximizeRule:set_enabled(false)
 
 hl.window_rule({
     -- Fix some dragging issues with XWayland
@@ -404,35 +259,10 @@ hl.window_rule({
     no_focus = true,
 })
 
--- force steam game to be fullscreen
--- hl.window_rule({
---     name = "steam-games-fullscreen",
---     match = {
---         class = "^steam_app_.*$",
---     },
---     fullscreen = true,
--- })
-
--- Layer rules also return a handle.
--- local overlayLayerRule = hl.layer_rule({
---     name  = "no-anim-overlay",
---     match = { namespace = "^my-overlay$" },
---     no_anim = true,
--- })
--- overlayLayerRule:set_enabled(false)
-
--- Hyprland-run windowrule
 hl.window_rule({
     name  = "move-hyprland-run",
     match = { class = "hyprland-run" },
 
     move  = "20 monitor_h-120",
-    float = true,
-})
-
--- Force Android Emulator windows to float
-hl.window_rule({
-    name  = "android-emulator-float",
-    match = { class = "Emulator" },
     float = true,
 })

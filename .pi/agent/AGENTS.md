@@ -37,6 +37,32 @@ Good:
 -- if none we use the filetype
 ```
 
+In typescript or javascript a function must have a jsdoc.
+
+Description, param and return block are mandatory.
+
+Example or other kind of block no.
+
+The text must not contain any . at the end of line.
+
+```ts
+/**
+ * Add two number and return the value
+ *
+ * @param a - the first number
+ * @param b - the second number
+ * @return - the computed value
+ *
+ * @example
+ * ```
+ * const r = add(1, 2);
+ * ```
+ */
+function add(a: number, b: number): number {
+  return a + b;
+}
+```
+
 # Scope and verification
 
 Read project instructions before editing.
