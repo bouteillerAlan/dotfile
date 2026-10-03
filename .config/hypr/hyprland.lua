@@ -1,27 +1,43 @@
-local outMain = "eDP-1"
-local workTwo = "HDMI-A-1"
+local center = "DP-5"
+local left = "DP-4"
+local right = "DP-6"
+
+-- Monitor DP-6 (ID 2):
+--         2560x1440@59.95100 at 4480x0
+-- Monitor DP-5 (ID 1):
+--         2560x1440@59.95100 at 1920x0
+-- Monitor DP-4 (ID 0):
+--         3840x2160@60.00000 at 0x0
 
 hl.monitor({
-    output   = outMain,
+    output   = center,
     mode     = "2560x1600@240",
     position = "0x0",
     scale    = 1,
 })
 
 hl.monitor({
-    output   = workTwo,
+    output   = left,
     mode     = "1920x1080@60",
+    position = "-1920x0",
+    scale    = 1,
+})
+
+hl.monitor({
+    output   = right,
+    mode     = "2560x1600@240",
     position = "2560x0",
     scale    = 1,
+    transform= 3,
 })
 
 local terminal    = "ghostty"
 local fileManager = "dolphin"
-local menu        = "rofi -show drun"
-local winmenu     = "rofi -show window"
-local emoji       = "rofi -modi emoji -show emoji"
-local calc        = "rofi -show calc -modi calc -no-show-match -no-sort"
-local yank        = "cliphist list | rofi -dmenu -p 'Yank!' | cliphist decode | wl-copy"
+local menu        = "~/.config/bemenu/app-explorer"
+local winmenu     = "~/.config/bemenu/window-picker"
+local calc        = "~/.config/bemenu/calculator"
+local emoji       = "~/.config/bemenu/emoji-picker"
+local yank        = "~/.config/bemenu/yank-history"
 local shutdown    = "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"
 
 hl.on("hyprland.start", function ()
@@ -180,22 +196,14 @@ hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
--- Switch workspaces with mainMod + [0-9]
--- Move active window to a workspace with mainMod + SHIFT + [0-9]
--- for i = 1, 10 do
---     local key = i % 10 -- 10 maps to key 0
---     hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
---     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
--- end
-
 -- workspace, screen
 local workspaces = {
-  [1] = { name = "name:srf", monitor = outMain, default = true },
-  [2] = { name = "name:dev", monitor = outMain },
-  [3] = { name = "name:stg", monitor = outMain },
-  [4] = { name = "name:nvi", monitor = workTwo, default = true },
-  [5] = { name = "name:sde", monitor = workTwo },
-  [6] = { name = "name:ext", monitor = workTwo },
+  [1] = { name = "name:srf", monitor = center, default = true },
+  [2] = { name = "name:dev", monitor = left },
+  [3] = { name = "name:stg", monitor = right },
+  [4] = { name = "name:nvi", monitor = center, default = true },
+  [5] = { name = "name:sde", monitor = center },
+  [6] = { name = "name:ext", monitor = center },
 }
 
 for id, ws in pairs(workspaces) do
