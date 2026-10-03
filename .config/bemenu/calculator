@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/config"
+
+history_file="${XDG_CACHE_HOME:-$HOME/.cache}/bemenu/calculator-history"
+mkdir -p "${history_file%/*}"
+
+expression=$(
+    { [[ -f $history_file ]] && tac "$history_file"; } |
+        BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt 'calc (Shift+Enter)'
+) || exit 0
+[[ -n $expression ]] || exit 0
+
+if [[ $expression == *" = "* ]]; then
+    expression=${expression%" = "*}
+fi
+
+result=$(qalc --terse "$expression") || exit 0
+history_entry="$expression = $result"
+{
+    printf '%s\n' "$history_entry"
+    [[ -f $history_file ]] && grep -Fvx -- "$history_entry" "$history_file" || true
+} | head -n 100 > "$history_file.tmp"
+mv "$history_file.tmp" "$history_file"
+
+printf '%s\n' "$history_entry" |
+    BEMENU_BACKEND=wayland bemenu --single-instance --list 1 --prompt calc >/dev/null

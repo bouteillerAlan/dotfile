@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/config"
+
+selection=$(cliphist list | BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt 'yank!') || exit 0
+printf '%s\n' "$selection" | cliphist decode | wl-copy

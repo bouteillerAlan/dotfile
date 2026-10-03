@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/config"
+
+selection=$(hyprctl clients -j | jq -r '.[] | select(.mapped) | "\(.address)\t[\(.workspace.name)] \(.class): \(.title)"' |
+    BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt win) || exit 0
+address=${selection%%$'\t'*}
+hyprctl dispatch "hl.dsp.focus({ window = \"$address\" })"

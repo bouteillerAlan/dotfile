@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/config"
+
+# Launch visible desktop applications.
+declare -A seen_desktop_ids
+desktop_dirs=("${XDG_DATA_HOME:-$HOME/.local/share}/applications" /usr/local/share/applications /usr/share/applications)
+
+for desktop_dir in "${desktop_dirs[@]}"; do
+    for desktop_file in "$desktop_dir"/*.desktop; do
+        [[ -f "$desktop_file" ]] || continue
+
+        desktop_id=${desktop_file##*/}
+        [[ ${seen_desktop_ids[$desktop_id]+yes} ]] && continue
+        seen_desktop_ids[$desktop_id]=1
+
+        in_entry=false
+        name=
+        hidden=false
+        while IFS= read -r line || [[ -n $line ]]; do
+            case $line in
+                '[Desktop Entry]') in_entry=true ;;
+                \[*\]) $in_entry && break ;;
+                Name=*) $in_entry && name=${line#Name=} ;;
+                NoDisplay=true|Hidden=true) $in_entry && hidden=true ;;
+            esac
+        done < "$desktop_file"
+
+        [[ $in_entry == true && $hidden == false && -n $name ]] || continue
+        printf '%s\t%s\n' "$name" "$desktop_file"
+    done
+done | LC_ALL=C sort | BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt apps |
+    {
+        IFS= read -r selection || exit 0
+        gio launch "${selection#*$'\t'}"
+    }

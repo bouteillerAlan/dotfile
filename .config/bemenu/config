@@ -1,0 +1,6 @@
+# Oasis Moonlight palette from Neovim's NormalFloat and Pmenu highlights.
+# Restart an open picker after changing this file.
+export BEMENU_OPTS="--center --width-factor 0.30 --line-height 32 --margin 16 --border 2 \
+--tb #0c0e13ff --tf #e6a817ff --fb #0c0e13ff --ff #fffff0ff \
+--nb #0c0e13ff --nf #fffff0ff --ab #0c0e13ff --hb #141c24ff --hf #e6a817ff \
+--cb #e6a817ff --cf #0c0e13ff --bdr #141c24ff"

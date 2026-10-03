@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/config"
+
+selection=$(BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt emj < /usr/share/rofi-emoji/all_emojis.txt) || exit 0
+emoji=${selection%%$'\t'*}
+printf '%s' "$emoji" | wl-copy
+wtype "$emoji"
