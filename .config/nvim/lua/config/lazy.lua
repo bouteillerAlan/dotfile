@@ -42,3 +42,5 @@ require("config.pi_ai").setup()
 
 -- snippet finder
 require("config.snipet_finder").setup()
+
+require("config.latest").setup()
