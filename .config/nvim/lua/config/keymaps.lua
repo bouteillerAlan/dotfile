@@ -51,7 +51,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "gd", vim.lsp.buf.definition,
       vim.tbl_extend("force", opts, { desc = "LSP Definition" }))
     vim.keymap.set("n", "K", function()
-      vim.lsp.buf.hover({ border = "rounded", max_width = 100, max_height = 30 })
+      vim.lsp.buf.hover({ border = "single", max_width = 100, max_height = 30 })
     end, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = "LSP Declaration" }))
     vim.keymap.set("n", 'gi', function() require('trouble').toggle('lsp_implementations') end, vim.tbl_extend('force', opts, { desc = 'LSP Implementation' }))

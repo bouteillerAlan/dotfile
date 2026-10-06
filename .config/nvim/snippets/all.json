@@ -1,6 +1,6 @@
 {
   "GPL-3.0 file header": {
-    "prefix": "me",
+    "prefix": "::me",
     "description": "GPL-3.0 file header (Alan Bouteiller)",
     "body": [
       "${TM_FILENAME}",
@@ -24,12 +24,12 @@
     ]
   },
   "Environment variable": {
-    "prefix": "env",
+    "prefix": "::env",
     "description": "Read an environment variable",
     "body": ["process.env.${1:NAME}"]
   },
   "Async function": {
-    "prefix": "afn",
+    "prefix": "::afn",
     "description": "Async function returning a Promise",
     "body": [
       "async function ${1:name}(${2}): Promise<${3:void}> {",
@@ -38,7 +38,7 @@
     ]
   },
   "bash strict boilerplate": {
-    "prefix": "bash",
+    "prefix": "::bash",
     "body": [
       "#!/usr/bin/env bash",
       "set -euo pipefail",

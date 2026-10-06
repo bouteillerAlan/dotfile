@@ -1,6 +1,6 @@
 {
   "bash strict boilerplate": {
-    "prefix": "bash",
+    "prefix": "::bash",
     "body": [
       "#!/usr/bin/env bash",
       "set -euo pipefail",
