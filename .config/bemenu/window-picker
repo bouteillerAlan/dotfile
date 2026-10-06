@@ -5,4 +5,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/config"
 selection=$(hyprctl clients -j | jq -r '.[] | select(.mapped) | "\(.address)\t[\(.workspace.name)] \(.class): \(.title)"' |
     BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt win) || exit 0
 address=${selection%%$'\t'*}
-hyprctl dispatch "hl.dsp.focus({ window = \"$address\" })"
+hyprctl eval "
+local target = hl.get_window(\"address:$address\")
+local workspace = hl.get_active_workspace()
+
+hl.dispatch(hl.dsp.window.move({ window = target, workspace = workspace, follow = false }))
+return hl.dispatch(hl.dsp.focus({ window = target }))
+"
