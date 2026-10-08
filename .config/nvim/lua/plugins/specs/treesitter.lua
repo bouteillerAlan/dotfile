@@ -11,6 +11,7 @@ return {
       "go",
       "typescript",
       "javascript",
+      "jsdoc",
       "zig",
       "html",
       "scss",
