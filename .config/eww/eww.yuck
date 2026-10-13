@@ -1,0 +1,96 @@
+(defpoll clock :interval "1s" `date '+%H:%M • %d/%m/%Y'`)
+(defpoll updates :interval "30m" `printf '󰏖 %s/%s' "$(checkupdates 2>/dev/null | grep -c .)" "$(yay -Qua 2>/dev/null | grep -c .)"`)
+(defpoll docker :interval "5s" `systemctl is-active --quiet docker && printf '󰡨 %s/%s' "$(docker ps -q | wc -l)" "$(docker ps -aq | wc -l)" || printf '󰡨 nr'`)
+(defpoll mpris :interval "2s" `playerctl -a metadata --format '{{status}}\t{{artist}} - {{title}}' 2>/dev/null | awk -F '\t' '$1 == "Playing" {print " " $2; exit}' | cut -c1-35`)
+(defpoll bluetooth :interval "5s" `bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' && printf 'bt %s' "$(bluetoothctl devices Connected 2>/dev/null | wc -l)" || printf 'bt off'`)
+(defpoll audio_output :interval "2s" `bash ~/.config/eww/scripts/audio-output.sh`)
+(defpoll battery :interval "5s" `upower -i "$(upower -e | grep BAT | head -1)" 2>/dev/null | awk -F: '/state:/ {state=$2} /percentage:/ {percent=$2} END {gsub(/^ +| +$/, "", state); gsub(/^ +| +$/, "", percent); print (state == "charging" ? "󰂄 " : "󱟢 ") percent}'`)
+(defpoll brightness_dp5 :interval "10s" `ddcutil --bus=12 getvcp 10 --brief 2>/dev/null | awk '/VCP 10/ {printf "󰱌 %s%%", $4}'`)
+(defpoll brightness_dp6 :interval "10s" `ddcutil --bus=13 getvcp 10 --brief 2>/dev/null | awk '/VCP 10/ {printf "󰱌 %s%%", $4}'`)
+(defpoll power_profile :interval "5s" `powerprofilesctl get 2>/dev/null | sed 's/performance/perf/; s/balanced/bal/; s/power-saver/eco/'`)
+(defpoll network :interval "3s" `nmcli -t -f ACTIVE,SSID dev wifi 2>/dev/null | awk -F: '$1 == "yes" {print "󰖩 " $2; found=1} END {if (!found) print "󰌙 off"}'`)
+(defpoll volume :interval "2s" `wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "vol %d%%%s", $2 * 100, ($3 == "[MUTED]" ? " muted" : "")}'`)
+(defpoll memory :interval "2s" `free | awk '/Mem:/ {printf " %02d%%", $3 / $2 * 100}'`)
+(defpoll cpu :interval "2s" `top -bn1 | awk '/Cpu[(]s[)]/ {printf " %02d%%", 100 - $8}'`)
+(defpoll services :interval "30s" `printf ' %s' "$(systemctl --user list-units --type=service --state=running --no-legend | grep -c .)"`)
+(deflisten active_tag_dp4 `sh -c 'mmsg get tags DP-4; mmsg watch tags DP-4' | jq -r --unbuffered '.active_tags[0] // 1'`)
+(deflisten active_tag_dp5 `sh -c 'mmsg get tags DP-5; mmsg watch tags DP-5' | jq -r --unbuffered '.active_tags[0] // 1'`)
+(deflisten active_tag_dp6 `sh -c 'mmsg get tags DP-6; mmsg watch tags DP-6' | jq -r --unbuffered '.active_tags[0] // 1'`)
+(deflisten layout_dp4 `sh -c 'mmsg get monitor DP-4; mmsg watch monitor DP-4' | jq -r --unbuffered '.layout_symbol // "?"'`)
+(deflisten layout_dp5 `sh -c 'mmsg get monitor DP-5; mmsg watch monitor DP-5' | jq -r --unbuffered '.layout_symbol // "?"'`)
+(deflisten layout_dp6 `sh -c 'mmsg get monitor DP-6; mmsg watch monitor DP-6' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(defwidget item [text command ?right_command]
+  (button :class "item" :onclick "${command}" :onrightclick "${right_command}"
+    (label :text text)))
+
+(defwidget workspace [number active_tag]
+  (button :class {active_tag == number ? "workspace active" : "workspace"} :onclick "mmsg dispatch toggletag,${number}"
+    (label :text number)))
+
+(defwidget bar [show_mpris active_tag layout brightness brightness_command]
+  (centerbox :class "bar"
+    (box :class "left" :halign "start" :hexpand false :space-evenly false
+      (item :text "⏻" :command "wleave")
+      (label :class "separator" :text "|")
+      (box :class "workspaces" :space-evenly false
+        (workspace :number "1" :active_tag active_tag) (workspace :number "2" :active_tag active_tag)
+        (workspace :number "3" :active_tag active_tag) (workspace :number "4" :active_tag active_tag))
+      (label :class "separator" :text "|")
+      (item :text layout :command "mmsg dispatch switch_layout")
+      (label :class "separator" :text "|")
+      (item :text updates :command "setsid -f ghostty -e yay")
+      (label :class "separator" :text "|")
+      (item :text docker
+        :command "systemctl is-active --quiet docker && (pkexec systemctl stop docker.service && pkexec systemctl stop docker.socket) || pkexec systemctl start docker")
+      (box :visible show_mpris :halign "start" :hexpand false :space-evenly false
+        (label :class "separator" :text "|")
+        (item :text mpris :command "playerctl play-pause")))
+    (box :class "center" :halign "center"
+      (item :text clock :command "pkill -x waycal || waycal"))
+    (box :class "right" :halign "end" :space-evenly false
+      (item :text bluetooth :command "setsid -f blueman-manager")
+      (label :class "separator" :text "|")
+      (item :text audio_output :command "setsid -f pavucontrol")
+      (box :visible {brightness != ""} :halign "start" :hexpand false :space-evenly false
+        (label :class "separator" :text "|")
+        (item :text brightness :command brightness_command))
+      (label :class "separator" :text "|")
+      (item :text battery :command "notify-send Battery \"$(upower -i $(upower -e | grep BAT) | grep -E 'state|percentage|time to')\"")
+      (item :text power_profile :command "powerprofilesctl set performance")
+      (label :class "separator" :text "|")
+      (item :text network :command "setsid -f ghostty -e nmtui")
+      (label :class "separator" :text "|")
+      (item :text volume :command "setsid -f pavucontrol" :right_command "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+      (label :class "separator" :text "|")
+      (item :text memory :command "setsid -f ghostty -e btop")
+      (label :class "separator" :text "|")
+      (item :text cpu :command "setsid -f ghostty -e btop")
+      (label :class "separator" :text "|")
+      (item :text services :command "setsid -f ghostty -e systemctl --user")
+      (label :class "separator" :text "|")
+      (systray :class "tray" :spacing 4 :icon-size 14))))
+
+(defwindow bar-0
+  :monitor 0
+  :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable "none"
+  (bar :show_mpris true :active_tag active_tag_dp4 :layout layout_dp4 :brightness "" :brightness_command ""))
+
+(defwindow bar
+  :monitor 1
+  :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable "none"
+  (bar :show_mpris true :active_tag active_tag_dp5 :layout layout_dp5 :brightness brightness_dp5 :brightness_command "sh -c 'nohup ddcui >/dev/null 2>&1 &'"))
+
+(defwindow bar-2
+  :monitor 2
+  :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable "none"
+  (bar :show_mpris false :active_tag active_tag_dp6 :layout layout_dp6 :brightness brightness_dp6 :brightness_command "sh -c 'nohup ddcui >/dev/null 2>&1 &'"))
