@@ -2,13 +2,9 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/config"
 
-selection=$(hyprctl clients -j | jq -r '.[] | select(.mapped) | "\(.address)\t[\(.workspace.name)] \(.class): \(.title)"' |
+selection=$(mmsg get all-clients | jq -r '.clients[] | "\(.id)\t[\(.tags | join(","))] \(.appid): \(.title)"' |
     BEMENU_BACKEND=wayland bemenu --single-instance --ignorecase --list 8 --prompt win) || exit 0
-address=${selection%%$'\t'*}
-hyprctl eval "
-local target = hl.get_window(\"address:$address\")
-local workspace = hl.get_active_workspace()
-
-hl.dispatch(hl.dsp.window.move({ window = target, workspace = workspace, follow = false }))
-return hl.dispatch(hl.dsp.focus({ window = target }))
-"
+client_id=${selection%%$'\t'*}
+active_tag=$(mmsg get all-monitors | jq -r '.monitors[] | select(.active).active_tags[0]') || exit 0
+mmsg dispatch "tagsilent,$active_tag" "client,$client_id" &&
+    mmsg dispatch "focusid,$client_id"
