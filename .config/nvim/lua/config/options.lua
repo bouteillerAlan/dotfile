@@ -18,7 +18,7 @@ function M.setup()
   vim.opt.undofile = true
   vim.opt.ignorecase = true
   vim.opt.scrolloff = 20
-  vim.opt.wrap = false
+  vim.opt.wrap = true
 end
 
 return M

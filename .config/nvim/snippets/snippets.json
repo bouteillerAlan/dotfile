@@ -99,5 +99,14 @@
       "\t${0}",
       "}"
     ]
+  },
+  "Lua do return": {
+    "prefix": "dor",
+    "description": "Lua do block that returns a value",
+    "body": [
+      "do",
+      "\treturn ${0}",
+      "end"
+    ]
   }
 }
