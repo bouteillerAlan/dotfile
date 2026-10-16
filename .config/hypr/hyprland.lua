@@ -1,17 +1,18 @@
-local outMain = "eDP-1"
-local workTwo = "HDMI-A-1"
+local screenRight = "DP-6"
+local screenCenter = "DP-5"
 
 hl.monitor({
-    output   = outMain,
-    mode     = "2560x1600@240",
-    position = "0x0",
+    output   = screenRight,
+    mode     = "2560x1440@144",
+    position = "2560x0",
     scale    = 1,
+    transform = 3,
 })
 
 hl.monitor({
-    output   = workTwo,
-    mode     = "1920x1080@60",
-    position = "2560x0",
+    output   = screenCenter,
+    mode     = "2560x1440@144",
+    position = "0x0",
     scale    = 1,
 })
 
@@ -22,21 +23,12 @@ local winmenu     = "~/.config/bemenu/window-picker"
 local emoji       = "~/.config/bemenu/emoji-picker"
 local calc        = "~/.config/bemenu/calculator"
 local yank        = "~/.config/bemenu/yank-history"
-local shutdown    = "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"
+local shutdown    = "wleave --buttons-per-row 1/1 -x --button-aspect-ratio 1"
+local screenshot  = "/home/a2n/.config/mango/screenshot.sh"
+local lock        = "gtklock --style ~/.config/miel/gtklock/style.css"
 
 hl.on("hyprland.start", function ()
-  hl.exec_cmd("notify-send \"Hypr\" \"Starting\"")
-  hl.exec_cmd("kwalletd6")
-  hl.exec_cmd("waybar & nm-applet & hyprpaper & dunst")
-  hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
-  hl.exec_cmd("nextcloud")
-  hl.exec_cmd("keepassxc")
-  hl.exec_cmd("fcitx5 -d")
-  hl.exec_cmd("easyeffects -w")
-  hl.exec_cmd("hypridle")
-  hl.exec_cmd("wl-paste --type text --watch cliphist store")
-  hl.exec_cmd("wl-paste --type image --watch cliphist store")
-  hl.exec_cmd("notify-send \"Hypr\" \"Done\"")
+  hl.exec_cmd("./startup.sh")
 end)
 
 hl.env("XCURSOR_SIZE", "24")
@@ -50,7 +42,7 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border   = "rgba(7fcf78ee)", -- Oasis Moonlight Dark thm_green
+            active_border   = "rgba(fff1ccee)", -- Miel cream
             inactive_border = "rgba(595959aa)",
         },
 
@@ -60,7 +52,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 4,
+        rounding       = 0,
         rounding_power = 2,
         active_opacity   = 1,
         inactive_opacity = 1,
@@ -130,7 +122,7 @@ hl.config({
     },
 })
 
--- !!! the text is deactivated directly in hyprpaper
+-- Disable Hyprland's default wallpaper text
 hl.config({
     misc = {
         force_default_wallpaper = 0,    -- Set to 0 or 1 to disable the anime mascot wallpapers
@@ -155,7 +147,7 @@ hl.config({
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(lock))
 
 hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
@@ -170,8 +162,8 @@ hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(winmenu))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprsnap"))
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprpicker -a"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(screenshot .. " freeze-region"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd(screenshot .. " annotate"))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
@@ -182,12 +174,10 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- workspace, screen
 local workspaces = {
-  [1] = { name = "name:srf", monitor = workTwo, default = true },
-  [2] = { name = "name:dev", monitor = workTwo },
-  [3] = { name = "name:stg", monitor = workTwo },
-  [4] = { name = "name:nvi", monitor = workTwo },
-  [5] = { name = "name:sde", monitor = workTwo },
-  [6] = { name = "name:ext", monitor = workTwo },
+  [1] = { name = "name:srf" },
+  [2] = { name = "name:dev" },
+  [3] = { name = "name:stg" },
+  [4] = { name = "name:nvi" },
 }
 
 for id, ws in pairs(workspaces) do
@@ -195,16 +185,13 @@ for id, ws in pairs(workspaces) do
       workspace    = id,
       persistent   = true,
       default_name = ws.name,
-      monitor      = ws.monitor,
-      default      = ws.default,
     })
     hl.bind(mainMod .. " + " .. id, hl.dsp.focus({ workspace = id }))
     hl.bind(mainMod .. " + SHIFT + " .. id, hl.dsp.window.move({ workspace = id }))
 end
 
--- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+-- Special workspace shortcut kept on Shift to leave Super+S for the lock screen
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.workspace.toggle_special("magic"))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
