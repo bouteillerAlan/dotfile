@@ -13,10 +13,10 @@
 (defpoll memory :interval "2s" `free | awk '/Mem:/ {printf " %02d%%", $3 / $2 * 100}'`)
 (defpoll cpu :interval "2s" `top -bn1 | awk '/Cpu[(]s[)]/ {printf " %02d%%", 100 - $8}'`)
 (defpoll services :interval "30s" `printf ' %s' "$(systemctl --user list-units --type=service --state=running --no-legend | grep -c .)"`)
-(deflisten active_tag_dp4 `sh -c 'mmsg get tags DP-4; mmsg watch tags DP-4' | jq -r --unbuffered '.active_tags[0] // 1'`)
+(deflisten active_tag_dp4 `sh -c 'mmsg get tags eDP-1; mmsg watch tags eDP-1' | jq -r --unbuffered '.active_tags[0] // 1'`)
 (deflisten active_tag_dp5 `sh -c 'mmsg get tags DP-5; mmsg watch tags DP-5' | jq -r --unbuffered '.active_tags[0] // 1'`)
 (deflisten active_tag_dp6 `sh -c 'mmsg get tags DP-6; mmsg watch tags DP-6' | jq -r --unbuffered '.active_tags[0] // 1'`)
-(deflisten layout_dp4 `sh -c 'mmsg get monitor DP-4; mmsg watch monitor DP-4' | jq -r --unbuffered '.layout_symbol // "?"'`)
+(deflisten layout_dp4 `sh -c 'mmsg get monitor eDP-1; mmsg watch monitor eDP-1' | jq -r --unbuffered '.layout_symbol // "?"'`)
 (deflisten layout_dp5 `sh -c 'mmsg get monitor DP-5; mmsg watch monitor DP-5' | jq -r --unbuffered '.layout_symbol // "?"'`)
 (deflisten layout_dp6 `sh -c 'mmsg get monitor DP-6; mmsg watch monitor DP-6' | jq -r --unbuffered '.layout_symbol // "?"'`)
 
@@ -31,7 +31,7 @@
 (defwidget bar [show_mpris active_tag layout brightness brightness_command]
   (centerbox :class "bar"
     (box :class "left" :halign "start" :hexpand false :space-evenly false
-      (item :text "⏻" :command "wleave")
+      (item :text "⏻" :command "setsid -f wleave --buttons-per-row 1/1 -x --button-aspect-ratio 1")
       (label :class "separator" :text "|")
       (box :class "workspaces" :space-evenly false
         (workspace :number "1" :active_tag active_tag) (workspace :number "2" :active_tag active_tag)
@@ -47,7 +47,7 @@
         (label :class "separator" :text "|")
         (item :text mpris :command "playerctl play-pause")))
     (box :class "center" :halign "center"
-      (item :text clock :command "pkill -x waycal || waycal"))
+      (item :text clock :command "pkill -x waycal || setsid -f waycal"))
     (box :class "right" :halign "end" :space-evenly false
       (item :text bluetooth :command "setsid -f blueman-manager")
       (label :class "separator" :text "|")
