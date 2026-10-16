@@ -7,7 +7,6 @@ for _ in $(seq 50); do
     awww query >/dev/null 2>&1 && break
     sleep 0.1
 done
-# awww img /home/a2n/Nextcloud/photos/wallpaper/best/tyler-lastovich-ddLiNMqWAOM-unsplash.jpg
 
 # launch notification daemon
 dunst &
@@ -35,8 +34,21 @@ awww img --transition-type wipe --transition-step 90 --transition-fps 60 --trans
 
 sleep 2
 
-# open the bar
-eww daemon && eww open-many bar-0 bar bar-2
+# open bars on active Mango monitors
+eww daemon
+mmsg get all-monitors | jq -r '.monitors[] | select(.active) | .name' |
+    while IFS= read -r monitor; do
+        case "$monitor" in
+            DP-4) bar=bar-dp4 ;;
+            DP-5) bar=bar-dp5 ;;
+            DP-6) bar=bar-dp6 ;;
+            eDP-1) bar=bar-edp1 ;;
+            HDMI-A-1) bar=bar-hdmi1 ;;
+            *) continue ;;
+        esac
+
+        eww open "$bar" --screen "$monitor"
+    done
 
 # personal software
 nextcloud &
@@ -45,5 +57,6 @@ easyeffects -w &
 
 # done!
 notify-send "Mango" "Done"
+./autowall.sh
 
 "$@"
