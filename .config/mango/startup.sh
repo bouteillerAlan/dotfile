@@ -1,8 +1,12 @@
 #!/usr/bin/env sh
 
+# daemon for the topbar
+eww daemon &
+
 # set splash screen
 awww-daemon --no-cache &
 # wait until the daemon is up
+# this is important for this one
 for _ in $(seq 50); do
     awww query >/dev/null 2>&1 && break
     sleep 0.1
@@ -32,31 +36,24 @@ wl-paste --type image --watch cliphist store &
 # switch to the real wallpaper
 awww img --transition-type wipe --transition-step 90 --transition-fps 60 --transition-angle 30 /home/a2n/Nextcloud/photos/wallpaper/best/tyler-lastovich-ddLiNMqWAOM-unsplash.jpg
 
+# idle daemon
+hypridle &
+
+# lil bit of delay because external monitors can take some time to show
 sleep 2
+/home/a2n/.config/mango/weebar.sh &
 
-# open bars on active Mango monitors
-eww daemon
-mmsg get all-monitors | jq -r '.monitors[] | select(.active) | .name' |
-    while IFS= read -r monitor; do
-        case "$monitor" in
-            DP-4) bar=bar-dp4 ;;
-            DP-5) bar=bar-dp5 ;;
-            DP-6) bar=bar-dp6 ;;
-            eDP-1) bar=bar-edp1 ;;
-            HDMI-A-1) bar=bar-hdmi1 ;;
-            *) continue ;;
-        esac
-
-        eww open "$bar" --screen "$monitor"
-    done
+# wallpaper/bar observer
+/home/a2n/.config/mango/autowall.sh &
 
 # personal software
+# at the end to avoid some window to show
+# like for nextcloud, because of no connection or else
 nextcloud &
 keepassxc &
 easyeffects -w &
 
 # done!
 notify-send "Mango" "Done"
-./autowall.sh
 
 "$@"

@@ -5,10 +5,11 @@ apply_wallpaper() {
 }
 
 udevadm monitor --udev --property --subsystem-match=drm |
-  while IFS=read -r property; do
-    [ "$proprety" = "ACTION=change" ] || continue
+  while IFS= read -r property; do
+    [ "$property" = "ACTION=change" ] || continue
     sleep 1
-    apply_wallpaper
+    apply_wallpaper # apply wallpaper
+    /home/a2n/.config/mango/weebar.sh # pop a bar
   done
 
 "$@"
