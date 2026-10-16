@@ -1,42 +1,26 @@
-local center = "DP-5"
-local left = "DP-4"
-local right = "DP-6"
-
--- Monitor DP-6 (ID 2):
---         2560x1440@59.95100 at 4480x0
--- Monitor DP-5 (ID 1):
---         2560x1440@59.95100 at 1920x0
--- Monitor DP-4 (ID 0):
---         3840x2160@60.00000 at 0x0
+local outMain = "eDP-1"
+local workTwo = "HDMI-A-1"
 
 hl.monitor({
-    output   = center,
+    output   = outMain,
     mode     = "2560x1600@240",
     position = "0x0",
     scale    = 1,
 })
 
 hl.monitor({
-    output   = left,
+    output   = workTwo,
     mode     = "1920x1080@60",
-    position = "-1920x0",
-    scale    = 1,
-})
-
-hl.monitor({
-    output   = right,
-    mode     = "2560x1600@240",
     position = "2560x0",
     scale    = 1,
-    transform= 3,
 })
 
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "~/.config/bemenu/app-explorer"
 local winmenu     = "~/.config/bemenu/window-picker"
-local calc        = "~/.config/bemenu/calculator"
 local emoji       = "~/.config/bemenu/emoji-picker"
+local calc        = "~/.config/bemenu/calculator"
 local yank        = "~/.config/bemenu/yank-history"
 local shutdown    = "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"
 
@@ -198,12 +182,12 @@ hl.bind(mainMod .. " + TAB", hl.dsp.window.cycle_next())
 
 -- workspace, screen
 local workspaces = {
-  [1] = { name = "name:srf", monitor = center, default = true },
-  [2] = { name = "name:dev", monitor = left },
-  [3] = { name = "name:stg", monitor = right },
-  [4] = { name = "name:nvi", monitor = center, default = true },
-  [5] = { name = "name:sde", monitor = center },
-  [6] = { name = "name:ext", monitor = center },
+  [1] = { name = "name:srf", monitor = workTwo, default = true },
+  [2] = { name = "name:dev", monitor = workTwo },
+  [3] = { name = "name:stg", monitor = workTwo },
+  [4] = { name = "name:nvi", monitor = workTwo },
+  [5] = { name = "name:sde", monitor = workTwo },
+  [6] = { name = "name:ext", monitor = workTwo },
 }
 
 for id, ws in pairs(workspaces) do
