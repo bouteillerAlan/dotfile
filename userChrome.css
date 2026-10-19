@@ -1,0 +1,13 @@
+/* https://docs.zen-browser.app/guides/live-editing#step-3-open-style-editor-in-zen-browser */
+
+* {
+  border-radius: 2px !important;
+}
+
+.tabbrowser-tab,
+.tabbrowser-tab > .tab-stack,
+.tabbrowser-tab .tab-background,
+.tabbrowser-tab .tab-background::before,
+.tabbrowser-tab .tab-background::after {
+  border-radius: 2px !important;
+}
