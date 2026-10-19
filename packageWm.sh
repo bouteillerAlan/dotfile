@@ -1,5 +1,6 @@
 sudo pacman -S \
-  hyprland hypridle gtklock ghostty dolphin \
+  mise \
+  mango hypridle gtklock ghostty dolphin \
   dunst libnotify \
   eww awww wleave bemenu bemenu-wayland \
   brightnessctl playerctl wlopm \
@@ -15,10 +16,7 @@ sudo pacman -S \
   jq ddcutil ddcui \
   libqalculate rofi-emoji \
   btop waycal \
-  pacman-contrib yay \
+  pacman-contrib \
   docker \
   ttf-jetbrains-mono-nerd noto-fonts-emoji \
   wlopm
-
-yay -S awww-git bemenu-git bemenu-wayland-git eww-git wleave-git
-
