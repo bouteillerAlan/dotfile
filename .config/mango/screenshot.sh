@@ -29,3 +29,5 @@ case "${1:-fullscreen}" in
     grim "$filepath"; satty --filename "$filepath" --output-filename "$filepath" --actions-on-enter save-to-file --early-exit ;;
   *) grim "$filepath" ;;
 esac
+
+notify-send "Grim" "Saved @$filepath"
