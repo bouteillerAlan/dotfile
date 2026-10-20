@@ -5,8 +5,6 @@
 (defpoll bluetooth :interval "5s" `bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' && printf 'bt %s' "$(bluetoothctl devices Connected 2>/dev/null | wc -l)" || printf 'bt off'`)
 (defpoll audio_output :interval "2s" `bash ~/.config/eww/scripts/audio-output.sh`)
 (defpoll battery :interval "5s" `upower -i "$(upower -e | grep BAT | head -1)" 2>/dev/null | awk -F: '/state:/ {state=$2} /percentage:/ {percent=$2} END {gsub(/^ +| +$/, "", state); gsub(/^ +| +$/, "", percent); print (state == "charging" ? "󰂄 " : "󱟢 ") percent}'`)
-(defpoll brightness_dp5 :interval "10s" `ddcutil --bus=12 getvcp 10 --brief 2>/dev/null | awk '/VCP 10/ {printf "󰱌 %s%%", $4}'`)
-(defpoll brightness_dp6 :interval "10s" `ddcutil --bus=13 getvcp 10 --brief 2>/dev/null | awk '/VCP 10/ {printf "󰱌 %s%%", $4}'`)
 (defpoll power_profile :interval "5s" `powerprofilesctl get 2>/dev/null | sed 's/performance/perf/; s/balanced/bal/; s/power-saver/eco/'`)
 (defpoll network :interval "3s" `nmcli -t -f ACTIVE,SSID dev wifi 2>/dev/null | awk -F: '$1 == "yes" {print "󰖩 " $2; found=1} END {if (!found) print "󰌙 off"}'`)
 (defpoll volume :interval "2s" `wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "vol %d%%%s", $2 * 100, ($3 == "[MUTED]" ? " muted" : "")}'`)
@@ -33,7 +31,7 @@
   (button :class {active_tag == number ? "workspace active" : "workspace"} :onclick "mmsg dispatch toggletag,${number}"
     (label :text number)))
 
-(defwidget bar [show_mpris show_tray active_tag layout brightness brightness_command]
+(defwidget bar [show_mpris show_tray active_tag layout]
   (centerbox :class "bar"
     (box :class "left" :halign "start" :hexpand false :space-evenly false
       (item :text "⏻" :command "setsid -f wleave --buttons-per-row 1/1 -x --button-aspect-ratio 1")
@@ -57,9 +55,6 @@
       (item :text bluetooth :command "setsid -f blueman-manager")
       (label :class "separator" :text "|")
       (item :text audio_output :command "setsid -f pavucontrol")
-      (box :visible {brightness != ""} :halign "start" :hexpand false :space-evenly false
-        (label :class "separator" :text "|")
-        (item :text brightness :command brightness_command))
       (label :class "separator" :text "|")
       (item :text battery :command "notify-send Battery \"$(upower -i $(upower -e | grep BAT) | grep -E 'state|percentage|time to')\"")
       (item :text power_profile :command "powerprofilesctl set performance")
@@ -85,32 +80,32 @@
   :stacking "fg"
   :exclusive true
   :focusable false
-  (bar :show_mpris true :show_tray false :active_tag active_tag_dp4 :layout layout_dp4 :brightness "" :brightness_command ""))
+  (bar :show_mpris true :show_tray false :active_tag active_tag_dp4 :layout layout_dp4))
 
 (defwindow bar-dp5
   :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
   :stacking "fg"
   :exclusive true
   :focusable false
-  (bar :show_mpris true :show_tray false :active_tag active_tag_dp5 :layout layout_dp5 :brightness brightness_dp5 :brightness_command "sh -c 'nohup ddcui >/dev/null 2>&1 &'"))
+  (bar :show_mpris true :show_tray true :active_tag active_tag_dp5 :layout layout_dp5))
 
 (defwindow bar-dp6
   :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
   :stacking "fg"
   :exclusive true
   :focusable false
-  (bar :show_mpris false :show_tray true :active_tag active_tag_dp6 :layout layout_dp6 :brightness brightness_dp6 :brightness_command "sh -c 'nohup ddcui >/dev/null 2>&1 &'"))
+  (bar :show_mpris false :show_tray false :active_tag active_tag_dp6 :layout layout_dp6))
 
 (defwindow bar-edp1
   :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
   :stacking "fg"
   :exclusive true
   :focusable false
-  (bar :show_mpris true :show_tray false :active_tag active_tag_edp1 :layout layout_edp1 :brightness "" :brightness_command ""))
+  (bar :show_mpris true :show_tray false :active_tag active_tag_edp1 :layout layout_edp1))
 
 (defwindow bar-hdmi1
   :geometry (geometry :x "0%" :y "0%" :width "100%" :height "28px" :anchor "top center")
   :stacking "fg"
   :exclusive true
   :focusable false
-  (bar :show_mpris true :show_tray false :active_tag active_tag_hdmi1 :layout layout_hdmi1 :brightness "" :brightness_command ""))
+  (bar :show_mpris true :show_tray false :active_tag active_tag_hdmi1 :layout layout_hdmi1))
