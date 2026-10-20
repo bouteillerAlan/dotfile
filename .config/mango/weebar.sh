@@ -2,9 +2,11 @@
 
 open_active_bars() {
   # Mango does not expose output names through the protocol Eww uses, so Eww
-  # sees them as "Unknown".  It can still select them by their output index.
-  mmsg get all-monitors | jq -r '.monitors | to_entries[] | select(.value.width > 0) | "\(.key)\t\(.value.name)"' |
-    while IFS="$(printf '\t')" read -r screen monitor; do
+  # sees them as "Unknown". Use the left-to-right output order for Eww's index.
+  mmsg get all-monitors | jq -r '.monitors[] | select(.width > 0) | .name' |
+    while IFS= read -r monitor; do
+      screen=$(mmsg get all-monitors | jq -r --arg monitor "$monitor" \
+        '.monitors | sort_by([.x, .y]) | map(.name) | index($monitor)')
       case "$monitor" in
         DP-4) bar=bar-dp4 ;;
         DP-5) bar=bar-dp5 ;;
