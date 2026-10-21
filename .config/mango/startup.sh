@@ -29,7 +29,8 @@ else
 fi
 
 # launch input method to fix deadkeys on ghostty
-fcitx5 -d &
+# replaced by GTK_IM_MODULE=simple ghostty
+# fcitx5 -d &
 
 # network manager applet
 nm-applet &
