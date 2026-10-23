@@ -13,6 +13,9 @@ if ! awww query >/dev/null 2>&1; then
   done
 fi
 
+# screen scharing
+/usr/lib/xdg-desktop-portal-wlr &
+
 # launch notification daemon
 dunst &
 notify-send "Mango" "Starting"
