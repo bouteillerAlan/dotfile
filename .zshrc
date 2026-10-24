@@ -1,6 +1,8 @@
 export ZSH="$HOME/.oh-my-zsh"
 
-ZSH_THEME="robbyrussell"
+# ZSH_THEME="robbyrussell"
+# ZSH_THEME="miel"
+source ~/.config/miel/oh-my-zsh/themes/miel.zsh-theme
 
 zstyle ':omz:update' frequency 3
 
@@ -19,6 +21,8 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 export EDITOR="$(which nvim)"
 export VISUAL="$EDITOR"
 
+alias show='eww reload & awww img --transition-type wipe --transition-step 90 --transition-fps 60 --transition-angle 30 /home/a2n/Nextcloud/photos/wallpaper/best/tyler-lastovich-ddLiNMqWAOM-unsplash.jpg'
+
 alias oui='echo "Ho?"'
 alias yes='echo "Ho?"'
 
@@ -35,6 +39,8 @@ alias nv="nvim"
 alias ls="eza -la --icons=always --git"
 alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- for grep, tldr -- for man, glances or bpytop -- for ressource monitor, gping -- for ping, screenfetch -- for info, lolcat and figlet -- for fun' | lolcat"
 alias batt="cat /sys/class/power_supply/BAT0/capacity"
+
+alias dstart="sudo systemctl start docker"
 
 # allow term in ssh to get kitty profile
 # alias ssh="kitten ssh"
@@ -66,7 +72,7 @@ export SUDO_EDITOR="nvim -u /home/a2n/.config/nvim"
 # eval "$(starship init zsh)"
 # eval "$(/home/a2n/.local/bin/oh-my-posh init zsh --config /home/a2n/.config/oh-my-posh/star.omp.json)"
 # eval "$(zellij setup --generate-auto-start zsh)"
-eval "$(oh-my-posh init zsh --config ~/.config/miel/oh-my-posh/themes/miel.omp.json)"
+# eval "$(oh-my-posh init zsh --config ~/.config/miel/oh-my-posh/themes/miel.omp.json)"
 
 # PYTHON
 # need pyenv pyenv-virtualenv poetry
@@ -111,6 +117,11 @@ export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH=/home/a2n/.opencode/bin:$PATH
 
 # atuin
-. "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh)"
-eval "$(~/.local/bin/mise activate zsh)"
+# . "$HOME/.atuin/bin/env"
+# eval "$(atuin init zsh)"
+# eval "$(~/.local/bin/mise activate zsh)"
+
+# mise en place
+eval "$(/home/a2n/.local/bin/mise activate zsh)"
+
+eval "$(/home/a2n/.local/bin/mise activate zsh)" # added by https://mise.run/zsh
