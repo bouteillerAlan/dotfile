@@ -10,12 +10,17 @@ return {
         appearance = {
           nerd_font_variant = "mono"
         },
-        signature = { enabled = true, trigger = { enabled = true, show_on_keyword = true } },
         completion = {
+          documentation = {
+            auto_show = true,
+            auto_show_delay_ms = 250,
+            window = { border = "single" },
+          },
           accept = {
             auto_brackets = { enabled = true },
           },
           menu = {
+            border = "single",
             draw = {
               columns = {
                 { "kind_icon" },
@@ -47,13 +52,14 @@ return {
               -- }
             },
           },
-          documentation = {
-            auto_show = true,
-            auto_show_delay_ms = 250,
-          },
           ghost_text = {
             enabled = false,
           },
+        },
+        signature = {
+          enabled = true,
+          trigger = { enabled = true, show_on_keyword = true },
+          window = { border = "single" },
         },
         -- sources = {
         --   default = { 'lsp', 'path', 'snippets', 'buffer' },

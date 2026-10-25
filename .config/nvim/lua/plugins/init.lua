@@ -31,5 +31,5 @@ return {
   { import = "plugins.specs.haunt" }, -- TheNoeTrevino/haunt.nvim
   { import = "plugins.specs.tiny-inline-diagnostic" }, -- rachartier/tiny-inline-diagnostic.nvim
   { import = "plugins.specs.miel" },
-  { import = "plugins.418.418" },
+  -- { import = "plugins.418.418" },
 }

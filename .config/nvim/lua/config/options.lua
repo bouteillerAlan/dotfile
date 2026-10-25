@@ -19,6 +19,17 @@ function M.setup()
   vim.opt.ignorecase = true
   vim.opt.scrolloff = 20
   vim.opt.wrap = true
+
+  -- Use Miel's FloatBorder highlight for every floating tooltip
+  vim.o.winborder = "single"
+  vim.diagnostic.config({ float = { border = "single" } })
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    callback = function()
+      vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { link = "FloatBorder" })
+      vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { link = "FloatBorder" })
+      vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { link = "FloatBorder" })
+    end,
+  })
 end
 
 return M
