@@ -1,0 +1,3 @@
+(defwidget tray-widget [visible]
+  (box :visible visible
+    (systray :class "tray" :spacing 4 :icon-size 18)))

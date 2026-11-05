@@ -1,0 +1,5 @@
+(deflisten audio_meter :initial "          │          " `python3 ~/.config/eww/widgets/audio-meter/audio-meter.py`)
+
+(defwidget audio-meter-widget []
+  (button :class "item audio-meter" :onclick "setsid -f pavucontrol"
+    (label :markup audio_meter)))

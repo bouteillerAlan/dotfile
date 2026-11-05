@@ -1,0 +1,4 @@
+(defpoll network :interval "3s" `wifi=$(nmcli -t -f ACTIVE,SSID dev wifi 2>/dev/null | awk -F: '$1 == "yes" {print "󰖩 " $2; exit}'); if [ -n "$wifi" ]; then printf '%s' "$wifi"; elif ethernet=$(nmcli -t -f DEVICE,TYPE,STATE dev 2>/dev/null | awk -F: '$2 == "ethernet" && $3 == "connected" {print $1; exit}'); [ -n "$ethernet" ]; then printf '󰈀 %s' "$ethernet"; else printf '󰌙 off'; fi`)
+
+(defwidget network-widget []
+  (item :text network :command "setsid -f ghostty -e nmtui"))

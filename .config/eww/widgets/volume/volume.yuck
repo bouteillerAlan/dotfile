@@ -1,0 +1,5 @@
+(defpoll volume :interval "2s" `wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "vol %d%%%s", $2 * 100, ($3 == "[MUTED]" ? " muted" : "")}'`)
+
+(defwidget volume-widget []
+  (item :text volume :command "setsid -f pavucontrol"
+    :right_command "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))

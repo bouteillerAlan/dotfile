@@ -1,0 +1,2 @@
+(defwidget memory-widget []
+  (item :text " ${round(EWW_RAM.used_mem_perc, 0)}%" :command "setsid -f ghostty -e btop"))

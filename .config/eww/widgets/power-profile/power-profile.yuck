@@ -1,0 +1,4 @@
+(defpoll power_profile :interval "5s" `powerprofilesctl get 2>/dev/null | sed 's/performance/perf/; s/balanced/bal/; s/power-saver/eco/'`)
+
+(defwidget power-profile-widget []
+  (item :text power_profile :command "powerprofilesctl set performance"))

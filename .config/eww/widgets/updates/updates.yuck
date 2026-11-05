@@ -1,0 +1,4 @@
+(defpoll updates :interval "30m" `printf '󰏖 %s/%s' "$(checkupdates 2>/dev/null | grep -c .)" "$(yay -Qua 2>/dev/null | grep -c .)"`)
+
+(defwidget updates-widget []
+  (item :text updates :command "setsid -f ghostty -e yay"))

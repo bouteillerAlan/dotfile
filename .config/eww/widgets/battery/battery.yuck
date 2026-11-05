@@ -1,0 +1,5 @@
+(defpoll battery :interval "30s" `upower -i "$(upower -e | grep BAT | head -1)" 2>/dev/null | awk -F: '/state:/ {state=$2} /percentage:/ {percent=$2} END {gsub(/^ +| +$/, "", state); gsub(/^ +| +$/, "", percent); print (state == "charging" ? "󰂄 " : "󱟢 ") (percent == "" ? "nb" : percent)}'`)
+
+(defwidget battery-widget []
+  (item :text battery
+    :command "notify-send Battery \"$(upower -i $(upower -e | grep BAT) | grep -E 'state|percentage|time to')\""))

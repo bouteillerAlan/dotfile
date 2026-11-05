@@ -1,0 +1,5 @@
+(deflisten network_speed :initial "↑    0B ↓    0B"
+  `bash ~/.config/eww/widgets/network-speed/network-speed.sh`)
+
+(defwidget network-speed-widget []
+  (label :text network_speed))

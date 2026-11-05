@@ -1,0 +1,4 @@
+(defpoll audio_output :interval "2s" `bash ~/.config/eww/widgets/audio-output/audio-output.sh`)
+
+(defwidget audio-output-widget []
+  (item :text audio_output :command "setsid -f pavucontrol"))

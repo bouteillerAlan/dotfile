@@ -1,0 +1,2 @@
+(defwidget power-widget []
+  (item :text "⏻" :command "setsid -f wleave --buttons-per-row 1/1 -x --button-aspect-ratio 1"))

@@ -1,0 +1,12 @@
+(deflisten layout_dp4 `sh -c 'mmsg get monitor DP-4; mmsg watch monitor DP-4' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(deflisten layout_dp5 `sh -c 'mmsg get monitor DP-5; mmsg watch monitor DP-5' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(deflisten layout_dp6 `sh -c 'mmsg get monitor DP-6; mmsg watch monitor DP-6' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(deflisten layout_edp1 `sh -c 'mmsg get monitor eDP-1; mmsg watch monitor eDP-1' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(deflisten layout_hdmi1 `sh -c 'mmsg get monitor HDMI-A-1; mmsg watch monitor HDMI-A-1' | jq -r --unbuffered '.layout_symbol // "?"'`)
+
+(defwidget layout-widget [layout]
+  (item :text layout :command "mmsg dispatch switch_layout"))

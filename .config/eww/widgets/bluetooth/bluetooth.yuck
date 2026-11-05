@@ -1,0 +1,4 @@
+(defpoll bluetooth :interval "5s" `bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' && printf 'bt %s' "$(bluetoothctl devices Connected 2>/dev/null | wc -l)" || printf 'bt off'`)
+
+(defwidget bluetooth-widget []
+  (item :text bluetooth :command "setsid -f blueman-manager"))

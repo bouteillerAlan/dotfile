@@ -1,0 +1,4 @@
+(defpoll mpris :interval "2s" `playerctl -a metadata --format '{{status}}\t{{artist}} - {{title}}' 2>/dev/null | awk -F '\t' '$1 == "Playing" {print " " $2; exit}' | cut -c1-35`)
+
+(defwidget media-player-widget []
+  (item :text mpris :command "playerctl play-pause"))

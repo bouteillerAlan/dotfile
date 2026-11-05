@@ -1,0 +1,5 @@
+(defpoll docker :interval "5s" `systemctl is-active --quiet docker && printf '󰡨 %s/%s' "$(docker ps -q | wc -l)" "$(docker ps -aq | wc -l)" || printf '󰡨 nr'`)
+
+(defwidget docker-widget []
+  (item :text docker
+    :command "systemctl is-active --quiet docker && (pkexec systemctl stop docker.service && pkexec systemctl stop docker.socket) || pkexec systemctl start docker"))

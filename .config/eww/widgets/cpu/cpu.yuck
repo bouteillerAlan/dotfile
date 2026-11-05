@@ -1,0 +1,2 @@
+(defwidget cpu-widget []
+  (item :text " ${round(EWW_CPU.avg, 0)}%" :command "setsid -f ghostty -e btop"))

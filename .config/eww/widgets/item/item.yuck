@@ -1,0 +1,3 @@
+(defwidget item [text command ?right_command]
+  (button :class "item" :onclick "${command}" :onrightclick "${right_command}"
+    (label :text text)))

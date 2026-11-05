@@ -1,0 +1,4 @@
+(defpoll clock :interval "1s" `date '+%H:%M • %d/%m/%Y'`)
+
+(defwidget clock-widget []
+  (item :text clock :command "pkill -x waycal || setsid -f waycal"))

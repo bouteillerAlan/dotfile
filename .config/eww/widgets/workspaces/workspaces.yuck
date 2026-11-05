@@ -1,0 +1,20 @@
+(deflisten active_tag_dp4 `sh -c 'mmsg get tags DP-4; mmsg watch tags DP-4' | jq -r --unbuffered '.active_tags[0] // 1'`)
+
+(deflisten active_tag_dp5 `sh -c 'mmsg get tags DP-5; mmsg watch tags DP-5' | jq -r --unbuffered '.active_tags[0] // 1'`)
+
+(deflisten active_tag_dp6 `sh -c 'mmsg get tags DP-6; mmsg watch tags DP-6' | jq -r --unbuffered '.active_tags[0] // 1'`)
+
+(deflisten active_tag_edp1 `sh -c 'mmsg get tags eDP-1; mmsg watch tags eDP-1' | jq -r --unbuffered '.active_tags[0] // 1'`)
+
+(deflisten active_tag_hdmi1 `sh -c 'mmsg get tags HDMI-A-1; mmsg watch tags HDMI-A-1' | jq -r --unbuffered '.active_tags[0] // 1'`)
+
+(defwidget workspace [number active_tag]
+  (button :class {active_tag == number ? "workspace active" : "workspace"} :onclick "mmsg dispatch toggletag,${number}"
+    (label :text number)))
+
+(defwidget workspaces-widget [active_tag]
+  (box :class "workspaces" :space-evenly false
+    (workspace :number "1" :active_tag active_tag)
+    (workspace :number "2" :active_tag active_tag)
+    (workspace :number "3" :active_tag active_tag)
+    (workspace :number "4" :active_tag active_tag)))

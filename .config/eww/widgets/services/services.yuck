@@ -1,0 +1,4 @@
+(defpoll services :interval "30s" `printf ' %s' "$(systemctl --user list-units --type=service --state=running --no-legend | grep -c .)"`)
+
+(defwidget services-widget []
+  (item :text services :command "setsid -f ghostty -e systemctl --user"))
