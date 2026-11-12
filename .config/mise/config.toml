@@ -1,4 +1,10 @@
 [tools]
-node = "latest"
+node = "lts"
+npm = "latest"
+"npm:@alibaba-group/open-code-review" = "latest"
+"npm:@olrtg/emmet-language-server" = "latest"
+"npm:@tailwindcss/language-server" = "latest"
+"npm:typescript-language-server" = "latest"
+"npm:vscode-langservers-extracted" = "latest"
 pnpm = "latest"
-yarn = "1.22.10"
+yarn = "latest"

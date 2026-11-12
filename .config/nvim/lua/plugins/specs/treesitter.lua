@@ -31,7 +31,8 @@ return {
       "toml",
       "qmljs",
       "c",
-      "c_sharp"
+      "c_sharp",
+      "yuck"
     }
   end
 }
