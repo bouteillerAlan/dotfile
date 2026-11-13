@@ -42,6 +42,17 @@ alias batt="cat /sys/class/power_supply/BAT0/capacity"
 
 alias dstart="sudo systemctl start docker"
 
+alias worktree="echo 'git worktree add -b my-branch /home/a2n/Documents/ekonsilio-v3-worktree'"
+
+function gtree() {
+  if (( $# != 2 )); then
+    print -u2 'Usage: gtree <-b new-branch> <target-path>'
+    print -u2 'Usage: gtree <target-path> <existing-branch>'
+    return 1
+  fi
+  git worktree add "$1" "$2"
+}
+
 # allow term in ssh to get kitty profile
 # alias ssh="kitten ssh"
 
