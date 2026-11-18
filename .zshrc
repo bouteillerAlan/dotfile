@@ -1,5 +1,10 @@
 export ZSH="$HOME/.oh-my-zsh"
 
+# Use the shared SSH agent without replacing a forwarded agent
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
+fi
+
 # ZSH_THEME="robbyrussell"
 # ZSH_THEME="miel"
 source ~/.config/miel/oh-my-zsh/themes/miel.zsh-theme
@@ -20,6 +25,8 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 # Set up neovim as the default editor.
 export EDITOR="$(which nvim)"
 export VISUAL="$EDITOR"
+
+alias mip='ip -br addr'
 
 alias show='eww reload & awww img --transition-type wipe --transition-step 90 --transition-fps 60 --transition-angle 30 /home/a2n/Nextcloud/photos/wallpaper/best/tyler-lastovich-ddLiNMqWAOM-unsplash.jpg'
 

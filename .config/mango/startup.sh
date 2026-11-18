@@ -2,6 +2,9 @@
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
+# Share the SSH agent with applications launched by this script
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
+
 # `exec_once` can be run again after a Mango reload.  Starting a second awww
 # daemon against its existing Wayland socket makes awww-daemon abort.
 if ! awww query >/dev/null 2>&1; then
