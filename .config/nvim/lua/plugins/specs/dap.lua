@@ -10,8 +10,20 @@ return {
           port = "${port}",
           executable = {
             command = "node",
-            args = { "/home/a2n/.dap/js-debug/src/dapDebugServer.js", "${port}" },
+            -- from https://github.com/microsoft/vscode-js-debug/releases
+            args = { "/home/a2n/.config/nvim/lua/plugins/dap/js-debug/src/dapDebugServer.js", "${port}" },
           },
+        }
+
+        dap.adapters["pwa-chrome"] = dap.adapters["pwa-node"]
+
+        -- from https://github.com/firefox-devtools/vscode-firefox-debug
+        dap.adapters.firefox = {
+          type = "executable",
+          command = "node",
+          args = { "/home/a2n/.config/nvim/lua/plugins/dap/vscode-firefox-debug/dist/adapter.bundle.js" },
+          -- leave time to accept the LibreWolf remote debugging prompt
+          options = { initialize_timeout_sec = 60 },
         }
 
         dap.adapters["reactnativedirect"] = require("dap-react-native").create_adapter(dap.adapters["pwa-node"])
@@ -39,6 +51,27 @@ return {
             name = "Attach NestJS (9229)",
             cwd = "${workspaceFolder}",
             port = 9229,
+          })
+          table.insert(dap.configurations[ft], {
+            type = "pwa-chrome",
+            request = "launch",
+            name = "Chrome (Vite 5173)",
+            url = "http://localhost:5173",
+            webRoot = "${workspaceFolder}/src",
+            sourceMaps = true,
+          })
+          -- Needs devtools.debugger.remote-enabled and devtools.chrome.enabled set to true in about:config
+          -- Update profileDir to your own LibreWolf profile path
+          table.insert(dap.configurations[ft], {
+            type = "firefox",
+            request = "launch",
+            name = "LibreWolf (Vite)",
+            url = function() return vim.fn.input("URL: ", "http://localhost:5173") end,
+            webRoot = "${workspaceFolder}",
+            firefoxExecutable = "/usr/bin/librewolf",
+            reAttach = true,
+            profileDir = "/home/a2n/.config/librewolf/librewolf/y03xvn0g.default-release",
+            keepProfileChanges = true,
           })
           table.insert(dap.configurations[ft], {
             type = "reactnativedirect",
