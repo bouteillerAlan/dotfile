@@ -1,103 +1,59 @@
-# Permission
-Ask again only before a new destructive, external, or privileged action.
+# Communication
 
-# Response
-For a direct binary question, start with `yes` or `no`, then give a concise plan or explanation unless the user asks for only the answer.
-For completed tasks, state changed files and checks in one short sentence.
-Keep explanation simple and clear, respect the "# Comment in code, JSDOC, TSDOC and similar" section even for response.
+- Be concise, direct, and clear
+- Answer only what was asked, with minimal useful context
+- Prefer one relevant example over multiple variations
+- Explain errors with their cause and fix
+- For yes/no questions, answer `yes` or `no` with minimal explanation
+- Avoid filler, emojis, unnecessary suggestions, CTA and conclusions
+- For completed tasks, summarize changes and checks in one short sentence
+- Apply these rules to code comments and documentation
+- If the answer need a search or more information ask or do the search, this is not mandatory
+- Always show the full path of any files, documents, url, and the protocol if needed to open the file on click for example : file:///home/a2n/Documents/fizz/bar.html
 
-Explain both the error and its fix. For example:
+# Code
 
-> `nvim` is an undefined global, so LuaLS cannot find the API signature through `N`.
-> Use `vim.api`, which is Neovim's typed global: `local N = vim.api`.
+- Read project instructions and follow existing conventions
+- Make the smallest change that solves the problem
+- Prefer native, simple solutions over unnecessary abstractions
+- Separate code by responsibility
+- Use descriptive variable and function names
+- Keep lines within 120 characters
+- Use one-line control flow only when readable
+- In React and similar frameworks, split distinct UI responsibilities into components
+- Preserve existing comments and their intent
+- Add short comments only when the intent is not obvious
+- Write comments in clear language without overexplaining
 
-# Comment in code, JSDOC, TSDOC and similar
+## JSDoc
 
-Never overwrite existing comments without preserving their intent. Use short phrases and clear prose.
-Never over complicate any sentence. Don't take the user for an idiot.
-You aim for short and comprehensive text.
+- Document every named JavaScript and TypeScript function, including methods
+- Inline callbacks do not require JSDoc
+- Include a description, `@param` for each parameter, and `@returns`
+- Do not add examples or optional blocks unless requested
+- Do not end JSDoc description lines with a period
 
-Example:
+# Tools and permissions
 
-Bad:
-```lua
--- Attached LSP client name instead of the full filetype word,
--- truncated to 6 chars -- "typescript" is long, "tsc" isn't.
--- Several clients can attach to one buffer (formatter, linter,
--- spell-checker, ...); only the actual language server tends to
--- support go-to-definition, so that's preferred over "just take the
--- first one", which could as easily be a spell-checker. Falls back
--- to the filetype when nothing matches.
-```
-
-Good:
-```lua
--- lsp client name instead of the filetype
--- if multiple lsp is found we take the one that support "go-to-definition"
--- if none we use the filetype
-```
-
-In typescript or javascript a function must have a jsdoc.
-
-Description, param and return block are mandatory.
-
-Example or other kind of block no.
-
-The text must not contain any . at the end of line.
-
-```ts
-/**
- * Add two number and return the value
- *
- * @param a - the first number
- * @param b - the second number
- * @return - the computed value
- *
- * @example
- * ```
- * const r = add(1, 2);
- * ```
- */
-function add(a: number, b: number): number {
-  return a + b;
-}
-```
+- Ask before destructive, privileged, or external actions
+- Allow read-only Git commands such as `status`, `diff`, and `log`
+- Ask before Git commands that modify local or remote state
+- Ask before infrastructure commands that create, modify, or delete resources
+- Allow read-only infrastructure commands and local checks
+- Prefer Bash for shell tasks and Go for repository tooling
+- Avoid Python when Bash is sufficient
+- Do not ask again for an action already authorized
 
 # Scope and verification
 
-Read project instructions before editing.
-Make the smallest change that solves the request.
-Run relevant checks after changes when they do not create resources.
-State which checks ran and any that could not run.
+- Ask when ambiguity could significantly affect the result
+- Do not modify generated files unless explicitly requested
+- Avoid unrelated changes
+- Run relevant, non-destructive checks after changes
+- Report checks that failed or could not run
 
-# Ambiguity and destructive actions
+# Response after changes
 
-Ask when requirements are ambiguous or a change may delete, overwrite, or expose user data.
-Do not modify generated files unless the user explicitly asks.
-
-# Git, GitHub, Gitlab or similar
-
-Never use a git related tool without asking for the user permission first.
-
-# Docker, Podman, Docker Compose, K8S, Terraform, Pulumi or other related CLI
-
-Never use a CLI that can launch an actual resource without asking for the user permission first.
-But you can use the CLI to check spell or lsp on your own.
-
-# Code in general
-Separate code by purpose.
-Always prefer native solution in place of complex one (eg: for a simple for in react if the form html event is enough we use it in place of the useState form, but that must be a thoughtful choice not an obligation because of this rule).
-In React or relative framework each part of the UI should be a component.
-Keep code lines at 128 characters or fewer.
-Use one-line control flow only when it stays clear and within the line limit.
-Constants and variables should have comprehensive names.
-Add a short comment only when the code needs context a junior developer would not infer.
-
-# Language and tools call
-Prefer Bash for shell tasks and Go for repository tools.
-Do not use Python when Bash is sufficient.
-
-# End of task
-Keep the end of task explanation clear and short.
-Do not over generate it.
-Respect "# Response".
+- State what changed and which checks ran
+- Mention failures or limitations when relevant
+- Keep the summary to one short sentence when possible

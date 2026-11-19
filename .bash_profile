@@ -2,4 +2,4 @@
 # ~/.bash_profile
 #
 
-. "$HOME/.atuin/bin/env"
+[[ -f ~/.bashrc ]] && . ~/.bashrc
