@@ -6,7 +6,6 @@ if [ -z "$SSH_AUTH_SOCK" ]; then
 fi
 
 # ZSH_THEME="robbyrussell"
-# ZSH_THEME="miel"
 source ~/.config/miel/oh-my-zsh/themes/miel.zsh-theme
 
 zstyle ':omz:update' frequency 3
@@ -30,12 +29,8 @@ alias mip='ip -br addr'
 
 alias show='eww reload & awww img --transition-type wipe --transition-step 90 --transition-fps 60 --transition-angle 30 /home/a2n/Nextcloud/photos/wallpaper/best/tyler-lastovich-ddLiNMqWAOM-unsplash.jpg'
 
-alias oui='echo "Ho?"'
-alias yes='echo "Ho?"'
-
 alias :r="source ~/.zshrc"
 alias reload="source ~/.zshrc"
-
 alias :t="tmux"
 alias :h="herdr"
 alias :q="exit"
@@ -48,6 +43,24 @@ alias brain="echo 'duf -- for disk, eza -- for ls, zoxide -- for cd, ripgrep -- 
 alias batt="cat /sys/class/power_supply/BAT0/capacity"
 
 alias dstart="sudo systemctl start docker"
+alias dsa='command docker ps -q | xargs -r -n 1 docker stop'
+unalias dsq 2>/dev/null
+function dsq() {
+  local containers container answer
+  containers=$(command docker ps --format '{{.Names}}') || return
+  [[ -n "$containers" ]] || return 0
+
+  for container in "${(@f)containers}"; do
+    while true; do
+      read -r "answer?Stop ${container}? [Y/n] " </dev/tty || return 1
+      case "$answer" in
+        y|Y|'') command docker stop "$container"; break ;;
+        n|N) break ;;
+        *) print 'Please answer y or n' ;;
+      esac
+    done
+  done
+}
 
 alias worktree="echo 'git worktree add -b my-branch /home/a2n/Documents/ekonsilio-v3-worktree'"
 
